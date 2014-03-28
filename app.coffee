@@ -22,7 +22,7 @@ class Pane
 		$G.on("resize", resize)
 		
 		if o.preview
-			@iframe = $('<iframe sandbox="allow-same-origin allow-scripts allow-popups allow-forms">')
+			@iframe = $('<iframe sandbox="allow-same-origin allow-scripts allow-forms">')
 			@iframe.appendTo @pane
 			$G.on "code-change", =>
 				head = ""
@@ -37,8 +37,11 @@ class Pane
 				if code.javascript
 					body += "<script>#{code.javascript}</script>"
 				if code.coffee
-					body += "<script type='text/coffeescript'>#{code.coffee}</script>"
-					head += "<script src='#{G.location.href}/lib/coffee-script.js'></script>"
+					try
+						js = CoffeeScript.compile(code.coffee)
+						body += "<script>#{js}</script>"
+					catch e
+						body += "<h1>CoffeeScript Compilation Error</h1>" + e.message
 				
 				html = """
 					<!doctype html>
@@ -85,13 +88,25 @@ class Pane
 			# Initialize contents
 			firepad.on 'ready', ->
 				if firepad.isHistoryEmpty()
-					firepad.setText '''
-						// JavaScript Editing with Firepad!
-						function go() {
-							var message = "Hello, world.";
-							console.log(message);
-						}
-					'''
+					firepad.setText (
+						javascript: '''
+							// JavaScript
+							
+							document.write("Hello World!");
+							
+						'''
+						coffee: '''
+							# CoffeeScript
+							
+							document.write "Hello World!"
+							
+						'''
+						css: '''
+							body {
+								font-family: Helvetica, sans-serif;
+							}
+						'''
+					)[o.lang] ? ""
 
 fb_root = new Firebase("https://multifiddle.firebaseio.com/")
 fb_project = null
@@ -108,7 +123,7 @@ else
 
 $ ->
 	panes = [
-		new Pane(lang:"javascript")
+		new Pane(lang:"coffee")
 		new Pane(preview:yes)
 	]
 	#set_theme "kr"

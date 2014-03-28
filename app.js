@@ -31,10 +31,10 @@ Pane = (function() {
     })();
     $G.on("resize", resize);
     if (o.preview) {
-      this.iframe = $('<iframe sandbox="allow-same-origin allow-scripts allow-popups allow-forms">');
+      this.iframe = $('<iframe sandbox="allow-same-origin allow-scripts allow-forms">');
       this.iframe.appendTo(this.pane);
       $G.on("code-change", function() {
-        var body, data_uri, head, html, iframe;
+        var body, data_uri, e, head, html, iframe, js;
         head = "";
         body = "";
         if (code.html) {
@@ -47,8 +47,13 @@ Pane = (function() {
           body += "<script>" + code.javascript + "</script>";
         }
         if (code.coffee) {
-          body += "<script type='text/coffeescript'>" + code.coffee + "</script>";
-          head += "<script src='" + G.location.href + "/lib/coffee-script.js'></script>";
+          try {
+            js = CoffeeScript.compile(code.coffee);
+            body += "<script>" + js + "</script>";
+          } catch (_error) {
+            e = _error;
+            body += "<h1>CoffeeScript Compilation Error</h1>" + e.message;
+          }
         }
         html = "<!doctype html>\n<html>\n	<head>\n		<meta charset=\"utf-8\">\n		" + head + "\n	</head>\n	<body style='background:black;color:white;'>\n		" + body + "\n	</body>\n</html>";
         data_uri = "data:text/html," + encodeURI(html);
@@ -77,8 +82,13 @@ Pane = (function() {
       session.setMode("ace/mode/" + o.lang);
       firepad = Firepad.fromACE(fb_fp, editor);
       firepad.on('ready', function() {
+        var _ref;
         if (firepad.isHistoryEmpty()) {
-          return firepad.setText('// JavaScript Editing with Firepad!\nfunction go() {\n	var message = "Hello, world.";\n	console.log(message);\n}');
+          return firepad.setText((_ref = {
+            javascript: '// JavaScript\n\ndocument.write("Hello World!");\n',
+            coffee: '# CoffeeScript\n\ndocument.write "Hello World!"\n',
+            css: 'body {\n	font-family: Helvetica, sans-serif;\n}'
+          }[o.lang]) != null ? _ref : "");
         }
       });
     }
@@ -105,7 +115,7 @@ $(function() {
   var panes;
   return panes = [
     new Pane({
-      lang: "javascript"
+      lang: "coffee"
     }), new Pane({
       preview: true
     })
