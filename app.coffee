@@ -10,23 +10,23 @@ $G = $(G = window)
 
 class Pane
 	constructor: (o)->
-		@pane = $('<div class="pane">')
-		@pane.appendTo('body')
+		$pane = $('<div class="pane">')
+		$pane.appendTo('body')
 		
-		(resize = =>
-			@pane.css
+		do resize = ->
+			$pane.css
 				width: innerWidth
 				height: innerHeight/2
-		)()
 		
 		$G.on("resize", resize)
 		
 		if o.preview
-			@iframe = $('<iframe sandbox="allow-same-origin allow-scripts allow-forms">')
-			@iframe.appendTo @pane
-			$G.on "code-change", =>
-				head = ""
-				body = ""
+			$iframe = $('<iframe sandbox="allow-same-origin allow-scripts allow-forms">')
+			$iframe.appendTo $pane
+			$G.on "code-change", ->
+				$pane.loading()
+				
+				head = body = ""
 				
 				# todo: handle errors
 				
@@ -58,20 +58,24 @@ class Pane
 				
 				data_uri = "data:text/html," + encodeURI(html)
 				
-				iframe = @iframe[0]
+				$iframe.one "load", -> $pane.loading("done")
+				
+				iframe = $iframe[0]
 				if iframe.contentWindow
 					iframe.contentWindow.location.replace data_uri
 				else
-					@iframe.attr src: data_uri
+					$iframe.attr src: data_uri
 		else
-			@pad = $('<div>')
-			@pad.appendTo @pane
+			$pad = $('<div>')
+			$pad.appendTo $pane
+			
+			$pane.loading()
 			
 			# Firepad Firebase reference
 			fb_fp = fb_project.child o.lang
-
+			
 			# Create ACE
-			editor = ace.edit @pad.get(0)
+			editor = ace.edit $pad.get(0)
 			ace_editors.push editor
 			editor.on 'input', ->
 				code[o.lang] = editor.getValue()
@@ -81,12 +85,13 @@ class Pane
 			session.setUseWrapMode yes
 			session.setUseWorker no
 			session.setMode "ace/mode/#{o.lang}"
-
+			
 			# Create Firepad
 			firepad = Firepad.fromACE fb_fp, editor
-
+			
 			# Initialize contents
 			firepad.on 'ready', ->
+				$pane.loading("done")
 				if firepad.isHistoryEmpty()
 					firepad.setText (
 						javascript: '''

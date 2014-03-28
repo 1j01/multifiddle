@@ -19,24 +19,23 @@ $G = $(G = window);
 
 Pane = (function() {
   function Pane(o) {
-    var editor, fb_fp, firepad, resize, session,
-      _this = this;
-    this.pane = $('<div class="pane">');
-    this.pane.appendTo('body');
+    var $iframe, $pad, $pane, editor, fb_fp, firepad, resize, session;
+    $pane = $('<div class="pane">');
+    $pane.appendTo('body');
     (resize = function() {
-      return _this.pane.css({
+      return $pane.css({
         width: innerWidth,
         height: innerHeight / 2
       });
     })();
     $G.on("resize", resize);
     if (o.preview) {
-      this.iframe = $('<iframe sandbox="allow-same-origin allow-scripts allow-forms">');
-      this.iframe.appendTo(this.pane);
+      $iframe = $('<iframe sandbox="allow-same-origin allow-scripts allow-forms">');
+      $iframe.appendTo($pane);
       $G.on("code-change", function() {
         var body, data_uri, e, head, html, iframe, js;
-        head = "";
-        body = "";
+        $pane.loading();
+        head = body = "";
         if (code.html) {
           body += code.html;
         }
@@ -57,20 +56,24 @@ Pane = (function() {
         }
         html = "<!doctype html>\n<html>\n	<head>\n		<meta charset=\"utf-8\">\n		" + head + "\n	</head>\n	<body style='background:black;color:white;'>\n		" + body + "\n	</body>\n</html>";
         data_uri = "data:text/html," + encodeURI(html);
-        iframe = _this.iframe[0];
+        $iframe.one("load", function() {
+          return $pane.loading("done");
+        });
+        iframe = $iframe[0];
         if (iframe.contentWindow) {
           return iframe.contentWindow.location.replace(data_uri);
         } else {
-          return _this.iframe.attr({
+          return $iframe.attr({
             src: data_uri
           });
         }
       });
     } else {
-      this.pad = $('<div>');
-      this.pad.appendTo(this.pane);
+      $pad = $('<div>');
+      $pad.appendTo($pane);
+      $pane.loading();
       fb_fp = fb_project.child(o.lang);
-      editor = ace.edit(this.pad.get(0));
+      editor = ace.edit($pad.get(0));
       ace_editors.push(editor);
       editor.on('input', function() {
         code[o.lang] = editor.getValue();
@@ -83,6 +86,7 @@ Pane = (function() {
       firepad = Firepad.fromACE(fb_fp, editor);
       firepad.on('ready', function() {
         var _ref;
+        $pane.loading("done");
         if (firepad.isHistoryEmpty()) {
           return firepad.setText((_ref = {
             javascript: '// JavaScript\n\ndocument.write("Hello World!");\n',
