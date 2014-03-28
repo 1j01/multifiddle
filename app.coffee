@@ -28,7 +28,29 @@ class Pane
 				
 				head = body = ""
 				
-				# todo: handle errors
+				error_handling = ->
+					d = document.createElement("div")
+					d.className = "error script-error"
+					window.onerror = (e)->
+						console.log arguments
+						document.body.appendChild(d)
+						d.style.position = "absolute"
+						d.style.borderRadius = d.style.padding = 
+						d.style.bottom = d.style.right = "5px"
+						d.innerText = d.textContent = e.message or e
+				
+				body += """
+					<script>~#{error_handling}()</script>
+					<style>
+						.error {
+							background: rgba(255, 0, 0, 0.8);
+							color: white;
+						}
+						body {
+							font-family: Helvetica, sans-serif;
+						}
+					</style>
+				"""
 				
 				if code.html
 					body += code.html
@@ -41,7 +63,7 @@ class Pane
 						js = CoffeeScript.compile(code.coffee)
 						body += "<script>#{js}</script>"
 					catch e
-						body += "<h1>CoffeeScript Compilation Error</h1>" + e.message
+						body += "<h1 class='error'>CoffeeScript Compilation Error</h1>" + e.message
 				
 				html = """
 					<!doctype html>

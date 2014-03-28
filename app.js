@@ -33,9 +33,22 @@ Pane = (function() {
       $iframe = $('<iframe sandbox="allow-same-origin allow-scripts allow-forms">');
       $iframe.appendTo($pane);
       $G.on("code-change", function() {
-        var body, data_uri, e, head, html, iframe, js;
+        var body, data_uri, e, error_handling, head, html, iframe, js;
         $pane.loading();
         head = body = "";
+        error_handling = function() {
+          var d;
+          d = document.createElement("div");
+          d.className = "error script-error";
+          return window.onerror = function(e) {
+            console.log(arguments);
+            document.body.appendChild(d);
+            d.style.position = "absolute";
+            d.style.borderRadius = d.style.padding = d.style.bottom = d.style.right = "5px";
+            return d.innerText = d.textContent = e.message || e;
+          };
+        };
+        body += "<script>~" + error_handling + "()</script>\n<style>\n	.error {\n		background: rgba(255, 0, 0, 0.8);\n		color: white;\n	}\n	body {\n		font-family: Helvetica, sans-serif;\n	}\n</style>";
         if (code.html) {
           body += code.html;
         }
@@ -51,7 +64,7 @@ Pane = (function() {
             body += "<script>" + js + "</script>";
           } catch (_error) {
             e = _error;
-            body += "<h1>CoffeeScript Compilation Error</h1>" + e.message;
+            body += "<h1 class='error'>CoffeeScript Compilation Error</h1>" + e.message;
           }
         }
         html = "<!doctype html>\n<html>\n	<head>\n		<meta charset=\"utf-8\">\n		" + head + "\n	</head>\n	<body style='background:black;color:white;'>\n		" + body + "\n	</body>\n</html>";
