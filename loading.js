@@ -40,7 +40,7 @@ jQuery.fn.loading = function(done) {
       }
     } else {
       if ($indicator) {
-        $indicator.stop().fadeIn(200);
+        return $indicator.stop().fadeIn(200);
       } else {
         indicator = canvas = document.createElement("canvas");
         $canvas = jQuery(canvas);
@@ -53,26 +53,26 @@ jQuery.fn.loading = function(done) {
             src: jQuery.fn.loading.image
           });
         }
+        indicator = $indicator[0];
+        document.body.appendChild(indicator);
+        indicator.width = indicator.height = s;
+        indicator.style.position = "absolute";
+        indicator.style.pointerEvents = "none";
+        update = function() {
+          var rect;
+          rect = parent.getBoundingClientRect();
+          indicator.style.left = rect.left + (rect.width - s) * 0.5 + "px";
+          indicator.style.top = rect.top + (rect.height - s) * 0.5 + "px";
+          if (ctx) {
+            draw(ctx, t += 0.3);
+          }
+          if (jQuery.contains(document, indicator)) {
+            return setTimeout(update, 15);
+          }
+        };
+        setTimeout(update, 15);
+        return $parent.data(d, $indicator);
       }
-      indicator = $indicator[0];
-      indicator.width = indicator.height = s;
-      indicator.style.position = "absolute";
-      indicator.style.pointerEvents = "none";
-      $indicator.appendTo("body");
-      update = function() {
-        var rect;
-        rect = parent.getBoundingClientRect();
-        indicator.style.left = rect.left + (rect.width - s) * 0.5 + "px";
-        indicator.style.top = rect.top + (rect.height - s) * 0.5 + "px";
-        if (ctx) {
-          draw(ctx, t += 0.3);
-        }
-        if (jQuery.contains(document, indicator)) {
-          return setTimeout(update, 15);
-        }
-      };
-      setTimeout(update, 15);
-      return $parent.data(d, $indicator);
     }
   });
 };

@@ -53,26 +53,25 @@ jQuery.fn.loading = (done)->
 					indicator = img = document.createElement "img"
 					$indicator = $(img).attr src: jQuery.fn.loading.image
 			
-			indicator = $indicator[0]
-			
-			indicator.width = indicator.height = s
-			
-			indicator.style.position = "absolute"
-			indicator.style.pointerEvents = "none"
-			
-			$indicator.appendTo "body"
-			
-			update = ->
-				rect = parent.getBoundingClientRect()
-				indicator.style.left = rect.left + (rect.width - s) * 0.5 + "px"
-				indicator.style.top = rect.top + (rect.height - s) * 0.5 + "px"
+				indicator = $indicator[0]
+				document.body.appendChild indicator
 				
-				if ctx then draw(ctx, t += 0.3)
+				indicator.width = indicator.height = s
 				
-				if jQuery.contains document, indicator
-					setTimeout update, 15
-			setTimeout update, 15
-			
-			$parent.data d, $indicator
+				indicator.style.position = "absolute"
+				indicator.style.pointerEvents = "none"
+				
+				update = ->
+					rect = parent.getBoundingClientRect()
+					indicator.style.left = rect.left + (rect.width - s) * 0.5 + "px"
+					indicator.style.top = rect.top + (rect.height - s) * 0.5 + "px"
+					
+					if ctx then draw(ctx, t += 0.3)
+					
+					if jQuery.contains document, indicator
+						setTimeout update, 15
+				setTimeout update, 15
+				
+				$parent.data d, $indicator
 
 jQuery.fn.loading.image = "http://d1ktyob8e4hu6c.cloudfront.net/static/img/wait.gif"
