@@ -156,7 +156,7 @@ class EditorPane extends Pane
 		editor.setReadOnly yes
 		editor.setSelectionStyle "text" # because this is what your selection will look like to other people
 		session.setUseWrapMode yes
-		session.setUseWorker yes
+		session.setUseWorker (lang isnt "html") # html linter recommends full html (<!doctype> etc.)
 		session.setUseSoftTabs hell no
 		session.setMode "ace/mode/#{lang}"
 		

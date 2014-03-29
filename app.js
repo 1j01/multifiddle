@@ -169,7 +169,7 @@ EditorPane = (function(_super) {
     editor.setReadOnly(true);
     editor.setSelectionStyle("text");
     session.setUseWrapMode(true);
-    session.setUseWorker(true);
+    session.setUseWorker(lang !== "html");
     session.setUseSoftTabs(hell(false));
     session.setMode("ace/mode/" + lang);
     firepad = Firepad.fromACE(fb_fp, editor);
