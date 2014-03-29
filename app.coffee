@@ -120,6 +120,7 @@ class EditorPane extends Pane
 		session = editor.getSession()
 		editor.setShowPrintMargin no
 		editor.setReadOnly yes
+		editor.setSelectionStyle "text" # because this is what your selection will look like to other people
 		session.setUseWrapMode yes
 		session.setUseWorker yes
 		session.setUseSoftTabs hell no

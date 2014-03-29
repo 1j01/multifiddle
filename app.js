@@ -118,6 +118,7 @@ EditorPane = (function(_super) {
     session = editor.getSession();
     editor.setShowPrintMargin(false);
     editor.setReadOnly(true);
+    editor.setSelectionStyle("text");
     session.setUseWrapMode(true);
     session.setUseWorker(true);
     session.setUseSoftTabs(hell(false));
