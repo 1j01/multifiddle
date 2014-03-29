@@ -9,6 +9,8 @@ hell = (boo)-> boo#yah
 class Pane
 	constructor: ->
 		$pane = @$pane = $('<div class="pane">')
+	
+	layout: ->
 
 class PanesPane extends Pane
 	constructor: ({orientation})->
@@ -16,8 +18,6 @@ class PanesPane extends Pane
 		
 		@orientation = orientation or "y"
 		@children = []
-		
-		@$pane.on("resize", => @layout())
 		
 	orient: (orientation)->
 		@orientation = orientation
@@ -43,7 +43,7 @@ class PanesPane extends Pane
 			child.$pane.css mpm, (mpl / n_children) - (10 * n_resizers)
 			child.$pane.css opm, opl
 			child.$pane.css {display}
-			child.$pane.triggerHandler("resize")
+			child.layout()
 	
 	add: (pane, location)->
 		@$pane.append(pane.$pane)
@@ -147,7 +147,7 @@ class EditorPane extends Pane
 		
 		# Create ACE
 		editor = @editor = ace.edit $pad.get(0)
-		editor.on 'input', ->
+		editor.on 'change', ->
 			code[lang] = editor.getValue()
 			$code.triggerHandler("change")
 		
@@ -201,6 +201,9 @@ class EditorPane extends Pane
 						}
 					'''
 				)[lang] ? ""
+	
+	layout: ->
+		@editor.resize()
 
 
 fb_root = new Firebase("https://multifiddle.firebaseio.com/")
@@ -227,7 +230,7 @@ $ ->
 	
 	$('body').append(main_pane.$pane)
 	
-	relayout = -> main_pane.$pane.triggerHandler("resize")
+	relayout = -> main_pane.layout()
 	$G.on "resize", relayout
 	relayout()
 	

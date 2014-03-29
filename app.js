@@ -19,6 +19,8 @@ Pane = (function() {
     $pane = this.$pane = $('<div class="pane">');
   }
 
+  Pane.prototype.layout = function() {};
+
   return Pane;
 
 })();
@@ -27,15 +29,11 @@ PanesPane = (function(_super) {
   __extends(PanesPane, _super);
 
   function PanesPane(_arg) {
-    var orientation,
-      _this = this;
+    var orientation;
     orientation = _arg.orientation;
     PanesPane.__super__.constructor.call(this);
     this.orientation = orientation || "y";
     this.children = [];
-    this.$pane.on("resize", function() {
-      return _this.layout();
-    });
   }
 
   PanesPane.prototype.orient = function(orientation) {
@@ -61,7 +59,7 @@ PanesPane = (function(_super) {
       child.$pane.css({
         display: display
       });
-      _results.push(child.$pane.triggerHandler("resize"));
+      _results.push(child.layout());
     }
     return _results;
   };
@@ -160,7 +158,7 @@ EditorPane = (function(_super) {
     $pane.loading();
     fb_fp = fb_project.child(lang);
     editor = this.editor = ace.edit($pad.get(0));
-    editor.on('input', function() {
+    editor.on('change', function() {
       code[lang] = editor.getValue();
       return $code.triggerHandler("change");
     });
@@ -186,6 +184,10 @@ EditorPane = (function(_super) {
       }
     });
   }
+
+  EditorPane.prototype.layout = function() {
+    return this.editor.resize();
+  };
 
   return EditorPane;
 
@@ -227,7 +229,7 @@ $(function() {
   bottom_pane.add(new PreviewPane);
   $('body').append(main_pane.$pane);
   relayout = function() {
-    return main_pane.$pane.triggerHandler("resize");
+    return main_pane.layout();
   };
   $G.on("resize", relayout);
   relayout();
