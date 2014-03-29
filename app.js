@@ -168,7 +168,7 @@ EditorPane = (function(_super) {
     editor.setShowPrintMargin(false);
     editor.setReadOnly(true);
     editor.setSelectionStyle("text");
-    session.setUseWrapMode(true);
+    session.setUseWrapMode(false);
     session.setUseWorker(lang !== "html");
     session.setUseSoftTabs(hell(false));
     session.setMode("ace/mode/" + lang);
