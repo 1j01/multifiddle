@@ -36,7 +36,7 @@ PreviewPane = (function(_super) {
     var $iframe, $pane;
     PreviewPane.__super__.constructor.call(this);
     $pane = this.$pane;
-    $iframe = $('<iframe sandbox="allow-same-origin allow-scripts allow-forms">');
+    $iframe = $('<iframe sandbox="allow-scripts allow-forms">');
     $iframe.appendTo($pane);
     $G.on("code-change", function() {
       var body, data_uri, e, error_handling, head, html, iframe, js;
@@ -73,17 +73,23 @@ PreviewPane = (function(_super) {
         }
       }
       html = "<!doctype html>\n<html>\n	<head>\n		<meta charset=\"utf-8\">\n		" + head + "\n	</head>\n	<body style='background:black;color:white;'>\n		" + body + "\n	</body>\n</html>";
-      data_uri = "data:text/html," + encodeURI(html);
       $iframe.one("load", function() {
         return $pane.loading("done");
       });
-      iframe = $iframe[0];
-      if (iframe.contentWindow) {
-        return iframe.contentWindow.location.replace(data_uri);
-      } else {
+      if (typeof $iframe[0].srcdoc === "string") {
         return $iframe.attr({
-          src: data_uri
+          srcdoc: html
         });
+      } else {
+        data_uri = "data:text/html," + encodeURI(html);
+        iframe = $iframe[0];
+        if (iframe.contentWindow) {
+          return iframe.contentWindow.location.replace(data_uri);
+        } else {
+          return $iframe.attr({
+            src: data_uri
+          });
+        }
       }
     });
   }
@@ -111,6 +117,7 @@ EditorPane = (function(_super) {
     });
     session = editor.getSession();
     editor.setShowPrintMargin(false);
+    editor.setReadOnly(true);
     session.setUseWrapMode(true);
     session.setUseWorker(true);
     session.setUseSoftTabs(hell(false));
@@ -119,6 +126,7 @@ EditorPane = (function(_super) {
     firepad.on('ready', function() {
       var _ref;
       $pane.loading("done");
+      editor.setReadOnly(false);
       if (firepad.isHistoryEmpty()) {
         return firepad.setText((_ref = {
           javascript: '// JavaScript\n\ndocument.write("Hello World!");\n',

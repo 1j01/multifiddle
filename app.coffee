@@ -22,7 +22,7 @@ class PreviewPane extends Pane
 		super()
 		$pane = @$pane
 		
-		$iframe = $('<iframe sandbox="allow-same-origin allow-scripts allow-forms">')
+		$iframe = $('<iframe sandbox="allow-scripts allow-forms">')
 		$iframe.appendTo $pane
 		$G.on "code-change", ->
 			$pane.loading()
@@ -83,16 +83,20 @@ class PreviewPane extends Pane
 					</body>
 				</html>
 			"""
-			
-			data_uri = "data:text/html," + encodeURI(html)
-			
 			$iframe.one "load", -> $pane.loading("done")
 			
-			iframe = $iframe[0]
-			if iframe.contentWindow
-				iframe.contentWindow.location.replace data_uri
+			# if browser supports srcdoc
+			if typeof $iframe[0].srcdoc is "string"
+				$iframe.attr srcdoc: html
 			else
-				$iframe.attr src: data_uri
+				# note: data URIs are limited to ~32k characters
+				data_uri = "data:text/html," + encodeURI(html)
+				
+				iframe = $iframe[0]
+				if iframe.contentWindow
+					iframe.contentWindow.location.replace data_uri
+				else
+					$iframe.attr src: data_uri
 
 class EditorPane extends Pane
 	constructor: ({lang})->
@@ -115,6 +119,7 @@ class EditorPane extends Pane
 		
 		session = editor.getSession()
 		editor.setShowPrintMargin no
+		editor.setReadOnly yes
 		session.setUseWrapMode yes
 		session.setUseWorker yes
 		session.setUseSoftTabs hell no
@@ -126,6 +131,7 @@ class EditorPane extends Pane
 		# Initialize contents
 		firepad.on 'ready', ->
 			$pane.loading("done")
+			editor.setReadOnly no
 			if firepad.isHistoryEmpty()
 				firepad.setText (
 					javascript: '''
