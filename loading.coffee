@@ -1,8 +1,11 @@
 jQuery.fn.loading = (done)->
-	d = "loading-indicator" #name to store linked element ("data") under
-	s = 100 #size (todo: responsive size)
-	c = s * 0.5 #center (half size)
-	{sin, cos, PI} = Math
+	fallback_image = "http://d1ktyob8e4hu6c.cloudfront.net/static/img/wait.gif"
+	min_size = 32
+	max_size = 100
+	
+	s = max_size #size
+	c = s * 0.5 #center
+	{sin, cos, min, max, PI} = Math
 	TAU = PI * 2 #C/r
 	
 	draw = (ctx, t)->
@@ -27,6 +30,7 @@ jQuery.fn.loading = (done)->
 			ctx.fill()
 			ctx.stroke()
 	
+	d = "loading-indicator" #name to store linked element ("data") under
 	@each ->
 		parent = this
 		$parent = jQuery parent
@@ -51,27 +55,38 @@ jQuery.fn.loading = (done)->
 					$indicator = $canvas
 				else
 					indicator = img = document.createElement "img"
-					$indicator = $(img).attr src: jQuery.fn.loading.image
+					$indicator = $(img).attr src: fallback_image
 			
 				indicator = $indicator[0]
 				document.body.appendChild indicator
 				
 				indicator.width = indicator.height = s
 				
-				indicator.style.position = "absolute"
-				indicator.style.pointerEvents = "none"
-				
 				update = ->
 					rect = parent.getBoundingClientRect()
+					s = max(min_size, 5, min(max_size, min(rect.width, rect.height)))
+					c = s * 0.5
+					
 					indicator.style.left = rect.left + (rect.width - s) * 0.5 + "px"
 					indicator.style.top = rect.top + (rect.height - s) * 0.5 + "px"
+					
+					indicator.width = s if indicator.width isnt s
+					indicator.height = s if indicator.height isnt s
 					
 					if ctx then draw(ctx, t += 0.3)
 					
 					if jQuery.contains document, indicator
 						setTimeout update, 15
-				setTimeout update, 15
+				
+				start = ->
+					indicator.style.display = "block"
+					indicator.style.position = "absolute"
+					indicator.style.pointerEvents = "none"
+					indicator.style.zIndex = "2"
+					update()
+				
+				indicator.style.display = "none"
+				
+				setTimeout start, 15
 				
 				$parent.data d, $indicator
-
-jQuery.fn.loading.image = "http://d1ktyob8e4hu6c.cloudfront.net/static/img/wait.gif"
