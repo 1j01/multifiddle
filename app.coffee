@@ -1,9 +1,4 @@
 
-ace_editors = []
-set_theme = (theme_name)->
-	for editor in ace_editors
-		editor.setTheme "ace/theme/#{theme_name}"
-
 code = {}
 
 $G = $(G = window)
@@ -31,13 +26,12 @@ class Pane
 				error_handling = ->
 					d = document.createElement("div")
 					d.className = "error script-error"
-					window.onerror = (e)->
-						console.log arguments
+					window.onerror = (error)->
 						document.body.appendChild(d)
 						d.style.position = "absolute"
 						d.style.borderRadius = d.style.padding = 
 						d.style.bottom = d.style.right = "5px"
-						d.innerText = d.textContent = e.message or e
+						d.innerText = d.textContent = error
 				
 				body += """
 					<script>~#{error_handling}()</script>
@@ -97,8 +91,7 @@ class Pane
 			fb_fp = fb_project.child o.lang
 			
 			# Create ACE
-			editor = ace.edit $pad.get(0)
-			ace_editors.push editor
+			editor = @editor = ace.edit $pad.get(0)
 			editor.on 'input', ->
 				code[o.lang] = editor.getValue()
 				$G.triggerHandler("code-change")
@@ -134,6 +127,10 @@ class Pane
 							}
 						'''
 					)[o.lang] ? ""
+	
+	set_theme: (theme)->
+		if @editor
+			@editor.setTheme theme.theme
 
 fb_root = new Firebase("https://multifiddle.firebaseio.com/")
 fb_project = null
@@ -153,5 +150,18 @@ $ ->
 		new Pane(lang:"coffee")
 		new Pane(preview:yes)
 	]
-	#set_theme "kr"
+	{themes, themesByName} = ace.require("ace/ext/themelist")
 	
+	set_theme = (theme_name)->
+		theme = themesByName[theme_name]
+		
+		if theme.isDark
+			$("body").addClass("dark")
+		else
+			$("body").removeClass("dark")
+		
+		for pane in panes
+			pane.set_theme theme
+	
+	set_theme "tomorrow_night_bright"
+	console.log themes #todo: list themes, options
