@@ -126,10 +126,24 @@ class Pane
 							
 						'''
 						coffee: '''
-							# CoffeeScript
 							
-							document.write "Hello World!"
-							
+							spans = 
+								for char in "Hello World from CoffeeScript!"
+									span = document.createElement("span")
+									document.body.appendChild(span)
+									span.innerHTML = char
+									(span)
+
+							t = 0
+							rainbow = ->
+								t += 0.05
+								for span, i in spans
+									span.style.color = "hsl(#{
+										Math.sin(t - i / 23) * 360
+									},100%,80%)"
+
+							setInterval rainbow, 30
+
 						'''
 						css: '''
 							body {
