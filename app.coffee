@@ -1,5 +1,6 @@
 
 code = {}
+$code = $(code)
 
 $G = $(G = window)
 
@@ -8,14 +9,45 @@ hell = (boo)-> boo#yah
 class Pane
 	constructor: ->
 		$pane = @$pane = $('<div class="pane">')
-		$pane.appendTo('body')
+
+class PanesPane extends Pane
+	constructor: ({orientation})->
+		super()
 		
-		do resize = ->
-			$pane.css
-				width: innerWidth
-				height: innerHeight/2
+		@orientation = orientation or "y"
+		@children = []
 		
-		$G.on("resize", resize)
+		@$pane.on("resize", => @layout())
+		
+	orient: (orientation)->
+		@orientation = orientation
+		@layout()
+	
+	layout: ->
+		# main parent measure: the space that's divided between children
+		mpm = if @orientation is "x" then "width" else "height"
+		# other parent measure: the measure that's the same for the parent and all children
+		opm = if @orientation is "x" then "height" else "width"
+		
+		# main parent measure: the space that's divided between children
+		display = if @orientation is "x" then "inline-block" else "block"
+		
+		# calculate the lengths of the parent
+		mpl = @$pane[mpm]()
+		opl = @$pane[opm]()
+		
+		n_children = @children.length
+		n_resizers = Math.max(0, n_children - 1)
+		
+		for child in @children
+			child.$pane.css mpm, (mpl / n_children) - (10 * n_resizers)
+			child.$pane.css opm, opl
+			child.$pane.css {display}
+			child.$pane.triggerHandler("resize")
+	
+	add: (pane, location)->
+		@$pane.append(pane.$pane)
+		@children.push pane
 
 class PreviewPane extends Pane
 	constructor: ->
@@ -24,7 +56,7 @@ class PreviewPane extends Pane
 		
 		$iframe = $('<iframe sandbox="allow-scripts allow-forms">')
 		$iframe.appendTo $pane
-		$G.on "code-change", ->
+		$code.on "change", ->
 			$pane.loading()
 			
 			head = body = ""
@@ -99,7 +131,9 @@ class PreviewPane extends Pane
 					$iframe.attr src: data_uri
 
 class EditorPane extends Pane
+	@s = []
 	constructor: ({lang})->
+		EditorPane.s.push @
 		super()
 		$pane = @$pane
 		
@@ -115,7 +149,7 @@ class EditorPane extends Pane
 		editor = @editor = ace.edit $pad.get(0)
 		editor.on 'input', ->
 			code[lang] = editor.getValue()
-			$G.triggerHandler("code-change")
+			$code.triggerHandler("change")
 		
 		session = editor.getSession()
 		editor.setShowPrintMargin no
@@ -183,10 +217,20 @@ else
 
 
 $ ->
-	panes = [
-		new EditorPane lang: "coffee"
-		new PreviewPane
-	]
+	main_pane = new PanesPane orientation: "y"
+	main_pane.add top_pane = new PanesPane orientation: "x"
+	main_pane.add bottom_pane = new PanesPane orientation: "x"
+	top_pane.add new EditorPane lang: "coffee"
+	top_pane.add new EditorPane lang: "css"
+	bottom_pane.add new EditorPane lang: "html"
+	bottom_pane.add new PreviewPane
+	
+	$('body').append(main_pane.$pane)
+	
+	relayout = -> main_pane.$pane.triggerHandler("resize")
+	$G.on "resize", relayout
+	relayout()
+	
 	{themes, themesByName} = ace.require("ace/ext/themelist")
 	
 	setTheme = (theme_name)->
@@ -197,8 +241,8 @@ $ ->
 		else
 			$("body").removeClass("dark")
 		
-		for pane in panes
-			pane.editor?.setTheme theme.theme
+		for edpane in EditorPane.s
+			edpane.editor.setTheme theme.theme
 	
 	setTheme "tomorrow_night_bright"
 	console.log themes #todo: list themes, options
