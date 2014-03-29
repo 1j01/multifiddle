@@ -27,7 +27,7 @@ class Pane
 				
 				error_handling = ->
 					d = document.createElement("div")
-					d.className = "error script-error"
+					d.className = "error bubble script-error"
 					window.onerror = (error)->
 						document.body.appendChild(d)
 						d.style.position = "absolute"
@@ -39,6 +39,9 @@ class Pane
 					<script>~#{error_handling}()</script>
 					<style>
 						.error {
+							color: red;
+						}
+						.error.bubble {
 							background: rgba(255, 0, 0, 0.8);
 							color: white;
 						}
@@ -59,7 +62,10 @@ class Pane
 						js = CoffeeScript.compile(code.coffee)
 						body += "<script>#{js}</script>"
 					catch e
-						body += "<h1 class='error'>CoffeeScript Compilation Error</h1>" + e.message
+						body += """
+							<h4 class='error'>CoffeeScript Compilation Error</h4>
+							<p>#{e.message}</p>
+						"""
 				
 				html = """
 					<!doctype html>
@@ -99,8 +105,9 @@ class Pane
 				$G.triggerHandler("code-change")
 			
 			session = editor.getSession()
+			editor.setShowPrintMargin no
 			session.setUseWrapMode yes
-			session.setUseWorker no
+			session.setUseWorker yes
 			session.setUseSoftTabs hell no
 			session.setMode "ace/mode/#{o.lang}"
 			

@@ -31,7 +31,7 @@ Pane = (function() {
         error_handling = function() {
           var d;
           d = document.createElement("div");
-          d.className = "error script-error";
+          d.className = "error bubble script-error";
           return window.onerror = function(error) {
             document.body.appendChild(d);
             d.style.position = "absolute";
@@ -39,7 +39,7 @@ Pane = (function() {
             return d.innerText = d.textContent = error;
           };
         };
-        body += "<script>~" + error_handling + "()</script>\n<style>\n	.error {\n		background: rgba(255, 0, 0, 0.8);\n		color: white;\n	}\n	body {\n		font-family: Helvetica, sans-serif;\n	}\n</style>";
+        body += "<script>~" + error_handling + "()</script>\n<style>\n	.error {\n		color: red;\n	}\n	.error.bubble {\n		background: rgba(255, 0, 0, 0.8);\n		color: white;\n	}\n	body {\n		font-family: Helvetica, sans-serif;\n	}\n</style>";
         if (code.html) {
           body += code.html;
         }
@@ -55,7 +55,7 @@ Pane = (function() {
             body += "<script>" + js + "</script>";
           } catch (_error) {
             e = _error;
-            body += "<h1 class='error'>CoffeeScript Compilation Error</h1>" + e.message;
+            body += "<h4 class='error'>CoffeeScript Compilation Error</h4>\n<p>" + e.message + "</p>";
           }
         }
         html = "<!doctype html>\n<html>\n	<head>\n		<meta charset=\"utf-8\">\n		" + head + "\n	</head>\n	<body style='background:black;color:white;'>\n		" + body + "\n	</body>\n</html>";
@@ -83,8 +83,9 @@ Pane = (function() {
         return $G.triggerHandler("code-change");
       });
       session = editor.getSession();
+      editor.setShowPrintMargin(false);
       session.setUseWrapMode(true);
-      session.setUseWorker(false);
+      session.setUseWorker(true);
       session.setUseSoftTabs(hell(false));
       session.setMode("ace/mode/" + o.lang);
       firepad = Firepad.fromACE(fb_fp, editor);
