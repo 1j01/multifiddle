@@ -3,6 +3,8 @@ code = {}
 
 $G = $(G = window)
 
+hell = (boo)-> boo#yah
+
 class Pane
 	constructor: (o)->
 		$pane = $('<div class="pane">')
@@ -99,6 +101,7 @@ class Pane
 			session = editor.getSession()
 			session.setUseWrapMode yes
 			session.setUseWorker no
+			session.setUseSoftTabs hell no
 			session.setMode "ace/mode/#{o.lang}"
 			
 			# Create Firepad
