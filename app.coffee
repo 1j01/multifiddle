@@ -1,60 +1,132 @@
 
+resizer_width = 10
+
 code = {}
 $code = $(code)
 
 $G = $(G = window)
+$body = $()
+
+E = (tagname)-> document.createElement tagname
 
 hell = (boo)-> boo#yah
 
 class Pane
 	constructor: ->
-		$pane = @$pane = $('<div class="pane">')
+		@$ = $(E 'div')
+		@$.addClass("pane")
+		@flex = 1
 	
 	layout: ->
 
 class PanesPane extends Pane
 	constructor: ({orientation})->
 		super()
+		@$.addClass("panes-pane")
 		
 		@orientation = orientation or "y"
 		@children = []
+		@$resizers = $()
 		
 	orient: (orientation)->
 		@orientation = orientation
 		@layout()
 	
 	layout: ->
-		# main parent measure: the space that's divided between children
-		mpm = if @orientation is "x" then "width" else "height"
-		# other parent measure: the measure that's the same for the parent and all children
-		opm = if @orientation is "x" then "height" else "width"
 		
-		# main parent measure: the space that's divided between children
-		display = if @orientation is "x" then "inline-block" else "block"
+		# css property `display` for orientation
+		display = (x:"inline-block", y:"block")[@orientation]
 		
-		# calculate the lengths of the parent
-		mpl = @$pane[mpm]()
-		opl = @$pane[opm]()
+		
+		# primary dimension which is divided between the children
+		_d1 = (x:"width", y:"height")[@orientation]
+		
+		# secondary dimension which is the same for the parent and all children
+		_d2 = (x:"height", y:"width")[@orientation]
+		
+		
+		# get the dimensions of the parent
+		pd1 = @$[_d1]()
+		pd2 = @$[_d2]()
 		
 		n_children = @children.length
 		n_resizers = Math.max(0, n_children - 1)
 		
-		for child in @children
-			child.$pane.css mpm, (mpl / n_children) - (10 * n_resizers)
-			child.$pane.css opm, opl
-			child.$pane.css {display}
-			child.layout()
+		parent_pane = @
+		for child_pane in @children
+			child_pane.size = child_pane.flex * ((pd1 / n_children) - (resizer_width * n_resizers))
+			
+			child_pane.$.css _d1, child_pane.size
+			child_pane.$.css _d2, pd2
+			child_pane.$.css {display}
+			child_pane.layout()
+		
+		resize_cursor = (x:"col-resize", y:"row-resize")[@orientation]
+		
+		mouse_pos_prop = (x:"clientX", y:"clientY")[@orientation]
+		
+		offset_prop_start = (x:"left", y:"top")[@orientation]
+		
+		
+		@$resizers.remove()
+		@$resizers = $()
+		
+		for i in [1..@children.length-1]
+			before = @children[i - 1]
+			after = @children[i]
+			$resizer = $(E "div").addClass("resizer #{resize_cursor}r")
+			$resizer.insertAfter(before.$)
+			$resizer.css _d1, resizer_width
+			$resizer.css _d2, pd2
+			$resizer.css {display}
+			$resizer.css cursor: resize_cursor
+			
+			$resizer.on "mousedown", (e)->
+				e.preventDefault()
+				$body.addClass("dragging")
+				
+				mousemove = (e)->
+					mouse_pos = e[mouse_pos_prop]
+					
+					before.size = mouse_pos - parent_pane.$.offset()[offset_prop_start] - resizer_width / 2
+					after.size = parent_pane.$[_d1]() - mouse_pos - resizer_width / 2
+					
+					before.$.css _d1, before.size
+					after.$.css _d1, after.size
+					
+					before.layout()
+					after.layout()
+					
+					total_size = (pd1) - (resizer_width * n_resizers)
+					before.flex = before.size / total_size
+					after.flex = after.size / total_size
+					
+					# normalize flex values
+					total_flex = 0
+					for pane in parent_pane.children
+						total_flex += pane.flex
+					for pane in parent_pane.children
+						pane.flex /= total_flex
+						pane.flex *= parent_pane.children.length
+				
+				$G.on "mousemove", mousemove
+				$G.on "mouseup", ->
+					$G.off "mousemove", mousemove
+					$body.removeClass("dragging")
+			
+			@$resizers = @$resizers.add($resizer)
 	
-	add: (pane, location)->
-		@$pane.append(pane.$pane)
+	add: (pane)->
+		@$.append(pane.$)
 		@children.push pane
 
 class PreviewPane extends Pane
 	constructor: ->
 		super()
-		$pane = @$pane
+		@$.addClass("preview-pane")
+		$pane = @$
 		
-		$iframe = $('<iframe sandbox="allow-scripts allow-forms">')
+		$iframe = $(E 'iframe').attr(sandbox:"allow-scripts allow-forms")
 		$iframe.appendTo $pane
 		$code.on "change", ->
 			$pane.loading()
@@ -135,9 +207,10 @@ class EditorPane extends Pane
 	constructor: ({lang})->
 		EditorPane.s.push @
 		super()
-		$pane = @$pane
+		@$.addClass("editor-pane")
+		$pane = @$
 		
-		$pad = $('<div>')
+		$pad = $ E 'div'
 		$pad.appendTo $pane
 		
 		$pane.loading()
@@ -220,6 +293,8 @@ else
 
 
 $ ->
+	$body = $(document.body)
+	
 	main_pane = new PanesPane orientation: "y"
 	main_pane.add top_pane = new PanesPane orientation: "x"
 	main_pane.add bottom_pane = new PanesPane orientation: "x"
@@ -228,7 +303,7 @@ $ ->
 	bottom_pane.add new EditorPane lang: "html"
 	bottom_pane.add new PreviewPane
 	
-	$('body').append(main_pane.$pane)
+	$body.append(main_pane.$)
 	
 	relayout = -> main_pane.layout()
 	$G.on "resize", relayout
@@ -240,9 +315,9 @@ $ ->
 		theme = themesByName[theme_name]
 		
 		if theme.isDark
-			$("body").addClass("dark")
+			$body.addClass("dark")
 		else
-			$("body").removeClass("dark")
+			$body.removeClass("dark")
 		
 		for edpane in EditorPane.s
 			edpane.editor.setTheme theme.theme
