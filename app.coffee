@@ -3,6 +3,8 @@ resizer_width = 10
 
 code = {}
 $code = $(code)
+code_previous = {}
+coffee_body = ""
 
 $G = $(G = window)
 $body = $()
@@ -166,15 +168,17 @@ class PreviewPane extends Pane
 			if code.javascript
 				body += "<script>#{code.javascript}</script>"
 			if code.coffee
-				try
-					js = CoffeeScript.compile(code.coffee)
-					body += "<script>#{js}</script>"
-				catch e
-					body += """
-						<h4 class='error'>CoffeeScript Compilation Error</h4>
-						<p>#{e.message}</p>
-					"""
-			
+				if code.coffee != code_previous.coffee
+					coffee_body = 
+						try
+							js = CoffeeScript.compile(code.coffee)
+							"<script>#{js}</script>"
+						catch e
+							"""
+							<h4 class='error'>CoffeeScript Compilation Error</h4>
+							<p>#{e.message}</p>
+							"""
+				code_previous.coffee = code.coffee
 			html = """
 				<!doctype html>
 				<html>
