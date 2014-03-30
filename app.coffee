@@ -16,7 +16,7 @@ hell = (boo)-> boo#yah
 class Pane
 	constructor: ->
 		@$ = $(E 'div')
-		@$.addClass("pane")
+		@$.addClass "pane"
 		@flex = 1
 	
 	layout: ->
@@ -24,7 +24,7 @@ class Pane
 class PanesPane extends Pane
 	constructor: ({orientation})->
 		super()
-		@$.addClass("panes-pane")
+		@$.addClass "panes-pane"
 		
 		@orientation = orientation or "y"
 		@children = []
@@ -38,7 +38,6 @@ class PanesPane extends Pane
 		
 		# css property `display` for orientation
 		display = (x:"inline-block", y:"block")[@orientation]
-		
 		
 		# primary dimension which is divided between the children
 		_d1 = (x:"width", y:"height")[@orientation]
@@ -125,7 +124,7 @@ class PanesPane extends Pane
 class PreviewPane extends Pane
 	constructor: ->
 		super()
-		@$.addClass("preview-pane")
+		@$.addClass "preview-pane"
 		$pane = @$
 		
 		$iframe = $(iframe = E 'iframe').attr(sandbox:"allow-same-origin allow-scripts allow-forms")
@@ -136,10 +135,10 @@ class PreviewPane extends Pane
 			head = body = ""
 			
 			error_handling = ->
-				d = document.createElement("div")
+				d = document.createElement "div"
 				d.className = "error bubble script-error"
 				window.onerror = (error)->
-					document.body.appendChild(d)
+					document.body.appendChild d
 					d.style.position = "absolute"
 					d.style.borderRadius = d.style.padding = 
 					d.style.bottom = d.style.right = "5px"
@@ -169,9 +168,9 @@ class PreviewPane extends Pane
 				body += "<script>#{code.javascript}</script>"
 			if code.coffee
 				if code.coffee != code_previous.coffee
-					coffee_body = 
+					coffee_body =
 						try
-							js = CoffeeScript.compile(code.coffee)
+							js = CoffeeScript.compile code.coffee
 							"<script>#{js}</script>"
 						catch e
 							"""
@@ -192,14 +191,14 @@ class PreviewPane extends Pane
 					</body>
 				</html>
 			"""
-			$iframe.one "load", -> $pane.loading("done")
+			$iframe.one "load", -> $pane.loading "done"
 			
 			# if browser supports srcdoc
 			if typeof $iframe[0].srcdoc is "string"
 				$iframe.attr srcdoc: html
 			else
 				# note: data URIs are limited to ~32k characters
-				data_uri = "data:text/html," + encodeURI(html)
+				data_uri = "data:text/html," + encodeURI html
 				
 				if iframe.contentWindow
 					iframe.contentWindow.location.replace data_uri
@@ -213,10 +212,10 @@ class EditorPane extends Pane
 	constructor: ({lang})->
 		EditorPane.s.push @
 		super()
-		@$.addClass("editor-pane")
+		@$.addClass "editor-pane"
 		$pane = @$
 		
-		$pad = $ E 'div'
+		$pad = $(E 'div')
 		$pad.appendTo $pane
 		
 		$pane.loading()
@@ -225,10 +224,10 @@ class EditorPane extends Pane
 		fb_fp = fb_project.child lang
 		
 		# Create ACE
-		editor = @editor = ace.edit $pad.get(0)
+		editor = @editor = ace.edit $pad[0]
 		editor.on 'change', ->
 			code[lang] = editor.getValue()
-			$code.triggerHandler("change")
+			$code.triggerHandler "change"
 		
 		session = editor.getSession()
 		editor.setShowPrintMargin no
@@ -244,7 +243,7 @@ class EditorPane extends Pane
 		
 		# Initialize contents
 		firepad.on 'ready', ->
-			$pane.loading("done")
+			$pane.loading "done"
 			editor.setReadOnly no
 			if firepad.isHistoryEmpty()
 				firepad.setText (
@@ -262,7 +261,7 @@ class EditorPane extends Pane
 								document.body.appendChild(span)
 								span.innerHTML = char
 								(span)
-
+						
 						t = 0
 						rainbow = ->
 							t += 0.05
@@ -270,9 +269,9 @@ class EditorPane extends Pane
 								span.style.color = "hsl(#{
 									Math.sin(t - i / 23) * 360
 								},100%,80%)"
-
+						
 						setInterval rainbow, 30
-
+						
 					'''
 					css: '''
 						body {
@@ -285,12 +284,12 @@ class EditorPane extends Pane
 		@editor.resize()
 
 
-fb_root = new Firebase("https://multifiddle.firebaseio.com/")
+fb_root = new Firebase "https://multifiddle.firebaseio.com/"
 fb_project = null
 
-hash = G.location.hash.replace('#', '')
+hash = G.location.hash.replace '#', ''
 if hash
-	fb_project = fb_root.child(hash)
+	fb_project = fb_root.child hash
 else
 	# generate unique location
 	fb_project = fb_root.push()
@@ -299,7 +298,7 @@ else
 
 
 $ ->
-	$body = $(document.body)
+	$body = $ document.body
 	
 	main_pane = new PanesPane orientation: "y"
 	main_pane.add top_pane = new PanesPane orientation: "x"
@@ -309,21 +308,21 @@ $ ->
 	bottom_pane.add new EditorPane lang: "html"
 	bottom_pane.add new PreviewPane
 	
-	$body.append(main_pane.$)
+	$body.append main_pane.$
 	
 	relayout = -> main_pane.layout()
 	$G.on "resize", relayout
 	relayout()
 	
-	{themes, themesByName} = ace.require("ace/ext/themelist")
+	{themes, themesByName} = ace.require "ace/ext/themelist"
 	
 	setTheme = (theme_name)->
 		theme = themesByName[theme_name]
 		
 		if theme.isDark
-			$body.addClass("dark")
+			$body.addClass "dark"
 		else
-			$body.removeClass("dark")
+			$body.removeClass "dark"
 		
 		for edpane in EditorPane.s
 			edpane.editor.setTheme theme.theme

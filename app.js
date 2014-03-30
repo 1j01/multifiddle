@@ -263,7 +263,7 @@ EditorPane = (function(_super) {
     $pad.appendTo($pane);
     $pane.loading();
     fb_fp = fb_project.child(lang);
-    editor = this.editor = ace.edit($pad.get(0));
+    editor = this.editor = ace.edit($pad[0]);
     editor.on('change', function() {
       code[lang] = editor.getValue();
       return $code.triggerHandler("change");
