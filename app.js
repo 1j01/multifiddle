@@ -57,7 +57,7 @@ PanesPane = (function(_super) {
   };
 
   PanesPane.prototype.layout = function() {
-    var $resizer, after, before, child_pane, d1_distrib, display, i, mouse_pos_prop, n_children, n_resizers, offset_prop_start, parent_pane, pd1, pd2, resize_cursor, _d1, _d2, _i, _j, _len, _ref, _ref1, _results;
+    var after, before, child_pane, child_pane_size, display, i, mouse_pos_prop, n_children, n_resizers, offset_prop_end, offset_prop_start, parent_pane, pd1, pd2, resize_cursor, space_to_distribute_in_d1, _d1, _d2, _i, _j, _len, _ref, _ref1, _results;
     display = {
       x: "inline-block",
       y: "block"
@@ -75,12 +75,12 @@ PanesPane = (function(_super) {
     n_children = this.children.length;
     n_resizers = Math.max(0, n_children - 1);
     parent_pane = this;
-    d1_distrib = (pd1 / n_children) - (resizer_width * n_resizers / 2);
+    space_to_distribute_in_d1 = pd1 - resizer_width * n_resizers;
     _ref = this.children;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       child_pane = _ref[_i];
-      child_pane.size = child_pane.flex * d1_distrib;
-      child_pane.$.css(_d1, child_pane.size);
+      child_pane_size = child_pane.flex / n_children * space_to_distribute_in_d1;
+      child_pane.$.css(_d1, child_pane_size);
       child_pane.$.css(_d2, pd2);
       child_pane.$.css({
         display: display
@@ -99,53 +99,58 @@ PanesPane = (function(_super) {
       x: "left",
       y: "top"
     }[this.orientation];
+    offset_prop_end = {
+      x: "right",
+      y: "bottom"
+    }[this.orientation];
     this.$resizers.remove();
     this.$resizers = $();
     _results = [];
-    for (i = _j = 1, _ref1 = this.children.length - 1; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 1 <= _ref1 ? ++_j : --_j) {
-      before = this.children[i - 1];
-      after = this.children[i];
-      $resizer = $(E("div")).addClass("resizer " + resize_cursor + "r");
-      $resizer.insertAfter(before.$);
-      $resizer.css(_d1, resizer_width);
-      $resizer.css(_d2, pd2);
-      $resizer.css({
-        display: display
-      });
-      $resizer.css({
-        cursor: resize_cursor
-      });
-      $resizer.on("mousedown", function(e) {
-        var mousemove;
-        e.preventDefault();
-        $body.addClass("dragging");
-        mousemove = function(e) {
-          var mouse_pos, pane, total_flex, total_size, _k, _len1, _ref2, _results1;
-          mouse_pos = e[mouse_pos_prop];
-          before.size = mouse_pos - parent_pane.$.offset()[offset_prop_start] - resizer_width / 2;
-          after.size = parent_pane.$[_d1]() - mouse_pos - resizer_width / 2;
-          before.$.css(_d1, before.size);
-          after.$.css(_d1, after.size);
-          before.layout();
-          after.layout();
-          total_size = pd1 - (resizer_width * n_resizers);
-          total_flex = 0;
-          _ref2 = parent_pane.children;
-          _results1 = [];
-          for (_k = 0, _len1 = _ref2.length; _k < _len1; _k++) {
-            pane = _ref2[_k];
-            pane.flex = pane.$[_d1]() / total_size;
-            _results1.push(pane.flex *= parent_pane.children.length);
-          }
-          return _results1;
-        };
-        $G.on("mousemove", mousemove);
-        return $G.on("mouseup", function() {
-          $G.off("mousemove", mousemove);
-          return $body.removeClass("dragging");
+    for (i = _j = 1, _ref1 = parent_pane.children.length - 1; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 1 <= _ref1 ? ++_j : --_j) {
+      before = parent_pane.children[i - 1];
+      after = parent_pane.children[i];
+      _results.push((function(before, after) {
+        var $resizer;
+        $resizer = $(E("div")).addClass("resizer " + resize_cursor + "r");
+        $resizer.insertAfter(before.$);
+        $resizer.css(_d1, resizer_width);
+        $resizer.css(_d2, pd2);
+        $resizer.css({
+          display: display
         });
-      });
-      _results.push(this.$resizers = this.$resizers.add($resizer));
+        $resizer.css({
+          cursor: resize_cursor
+        });
+        $resizer.on("mousedown", function(e) {
+          var mousemove;
+          e.preventDefault();
+          $body.addClass("dragging");
+          mousemove = function(e) {
+            var after_end, before_start, mouse_pos, pane, total_size, _k, _len1, _ref2, _results1;
+            mouse_pos = e[mouse_pos_prop];
+            before_start = before.$[0].getBoundingClientRect()[offset_prop_start];
+            after_end = after.$[0].getBoundingClientRect()[offset_prop_end];
+            before.$.css(_d1, mouse_pos - before_start - resizer_width / 2);
+            after.$.css(_d1, after_end - mouse_pos - resizer_width / 2);
+            before.layout();
+            after.layout();
+            total_size = pd1 - (resizer_width * n_resizers);
+            _ref2 = parent_pane.children;
+            _results1 = [];
+            for (_k = 0, _len1 = _ref2.length; _k < _len1; _k++) {
+              pane = _ref2[_k];
+              _results1.push(pane.flex = pane.$[_d1]() / total_size * n_children);
+            }
+            return _results1;
+          };
+          $G.on("mousemove", mousemove);
+          return $G.on("mouseup", function() {
+            $G.off("mousemove", mousemove);
+            return $body.removeClass("dragging");
+          });
+        });
+        return parent_pane.$resizers = parent_pane.$resizers.add($resizer);
+      })(before, after));
     }
     return _results;
   };

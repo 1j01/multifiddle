@@ -54,11 +54,10 @@ class PanesPane extends Pane
 		n_resizers = Math.max(0, n_children - 1)
 		
 		parent_pane = @
-		d1_distrib = ((pd1 / n_children) - (resizer_width * n_resizers / 2))
+		space_to_distribute_in_d1 = pd1 - resizer_width * n_resizers
 		for child_pane in @children
-			child_pane.size = child_pane.flex * d1_distrib
-			
-			child_pane.$.css _d1, child_pane.size
+			child_pane_size = child_pane.flex / n_children * space_to_distribute_in_d1
+			child_pane.$.css _d1, child_pane_size
 			child_pane.$.css _d2, pd2
 			child_pane.$.css {display}
 			child_pane.layout()
@@ -68,51 +67,53 @@ class PanesPane extends Pane
 		mouse_pos_prop = (x:"clientX", y:"clientY")[@orientation]
 		
 		offset_prop_start = (x:"left", y:"top")[@orientation]
+		offset_prop_end = (x:"right", y:"bottom")[@orientation]
 		
 		
 		@$resizers.remove()
 		@$resizers = $()
 		
-		for i in [1..@children.length-1]
-			before = @children[i - 1]
-			after = @children[i]
-			$resizer = $(E "div").addClass("resizer #{resize_cursor}r")
-			$resizer.insertAfter(before.$)
-			$resizer.css _d1, resizer_width
-			$resizer.css _d2, pd2
-			$resizer.css {display}
-			$resizer.css cursor: resize_cursor
-			
-			$resizer.on "mousedown", (e)->
-				e.preventDefault()
-				$body.addClass("dragging")
+		for i in [1..parent_pane.children.length-1]
+			before = parent_pane.children[i - 1]
+			after = parent_pane.children[i]
+			((before, after)->
+				$resizer = $(E "div").addClass("resizer #{resize_cursor}r")
+				$resizer.insertAfter(before.$)
+				$resizer.css _d1, resizer_width
+				$resizer.css _d2, pd2
+				$resizer.css {display}
+				$resizer.css cursor: resize_cursor
 				
-				mousemove = (e)->
-					mouse_pos = e[mouse_pos_prop]
+				$resizer.on "mousedown", (e)->
+					e.preventDefault()
+					$body.addClass("dragging")
 					
-					before.size = mouse_pos - parent_pane.$.offset()[offset_prop_start] - resizer_width / 2
-					after.size = parent_pane.$[_d1]() - mouse_pos - resizer_width / 2
+					mousemove = (e)->
+						mouse_pos = e[mouse_pos_prop]
+						
+						before_start = before.$[0].getBoundingClientRect()[offset_prop_start]
+						after_end = after.$[0].getBoundingClientRect()[offset_prop_end]
+						
+						before.$.css _d1, mouse_pos - before_start - resizer_width / 2
+						after.$.css _d1, after_end - mouse_pos - resizer_width / 2
+						
+						before.layout()
+						after.layout()
+						
+						# calculate flex values
+						total_size = (pd1) - (resizer_width * n_resizers)
+						for pane in parent_pane.children
+							pane.flex = pane.$[_d1]() / total_size * n_children
 					
-					before.$.css _d1, before.size
-					after.$.css _d1, after.size
-					
-					before.layout()
-					after.layout()
-					
-					total_size = (pd1) - (resizer_width * n_resizers)
-					
-					# normalize flex values
-					total_flex = 0
-					for pane in parent_pane.children
-						pane.flex = pane.$[_d1]() / total_size
-						pane.flex *= parent_pane.children.length
+					$G.on "mousemove", mousemove
+					$G.on "mouseup", ->
+						$G.off "mousemove", mousemove
+						$body.removeClass("dragging")
 				
-				$G.on "mousemove", mousemove
-				$G.on "mouseup", ->
-					$G.off "mousemove", mousemove
-					$body.removeClass("dragging")
+				parent_pane.$resizers = parent_pane.$resizers.add($resizer)
 			
-			@$resizers = @$resizers.add($resizer)
+			)(before, after)
+		
 	
 	add: (pane)->
 		@$.append(pane.$)
