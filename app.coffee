@@ -54,8 +54,9 @@ class PanesPane extends Pane
 		n_resizers = Math.max(0, n_children - 1)
 		
 		parent_pane = @
+		d1_distrib = ((pd1 / n_children) - (resizer_width * n_resizers / 2))
 		for child_pane in @children
-			child_pane.size = child_pane.flex * ((pd1 / n_children) - (resizer_width * n_resizers))
+			child_pane.size = child_pane.flex * d1_distrib
 			
 			child_pane.$.css _d1, child_pane.size
 			child_pane.$.css _d2, pd2
@@ -99,15 +100,11 @@ class PanesPane extends Pane
 					after.layout()
 					
 					total_size = (pd1) - (resizer_width * n_resizers)
-					before.flex = before.size / total_size
-					after.flex = after.size / total_size
 					
 					# normalize flex values
 					total_flex = 0
 					for pane in parent_pane.children
-						total_flex += pane.flex
-					for pane in parent_pane.children
-						pane.flex /= total_flex
+						pane.flex = pane.$[_d1]() / total_size
 						pane.flex *= parent_pane.children.length
 				
 				$G.on "mousemove", mousemove
