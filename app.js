@@ -59,26 +59,27 @@ PanesPane = (function(_super) {
   };
 
   PanesPane.prototype.layout = function() {
-    var after, before, child_pane, child_pane_size, display, i, mouse_pos_prop, n_children, n_resizers, offset_prop_end, offset_prop_start, parent_pane, pd1, pd2, resize_cursor, space_to_distribute_in_d1, _d1, _d2, _i, _j, _len, _ref, _ref1, _results;
+    var after, before, child_pane, child_pane_size, display, i, mouse_pos_prop, n_children, n_resizers, o, parent_pane, pd1, pd2, resize_cursor, space_to_distribute_in_d1, _d1, _d1_end, _d1_start, _d2, _i, _j, _len, _ref, _ref1, _results;
+    parent_pane = this;
+    o = this.orientation;
     display = {
       x: "inline-block",
       y: "block"
-    }[this.orientation];
+    }[o];
     _d1 = {
       x: "width",
       y: "height"
-    }[this.orientation];
+    }[o];
     _d2 = {
       x: "height",
       y: "width"
-    }[this.orientation];
-    pd1 = this.$[_d1]();
-    pd2 = this.$[_d2]();
-    n_children = this.children.length;
+    }[o];
+    pd1 = parent_pane.$[_d1]();
+    pd2 = parent_pane.$[_d2]();
+    n_children = parent_pane.children.length;
     n_resizers = Math.max(0, n_children - 1);
-    parent_pane = this;
     space_to_distribute_in_d1 = pd1 - resizer_width * n_resizers;
-    _ref = this.children;
+    _ref = parent_pane.children;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       child_pane = _ref[_i];
       child_pane_size = child_pane.flex / n_children * space_to_distribute_in_d1;
@@ -92,21 +93,21 @@ PanesPane = (function(_super) {
     resize_cursor = {
       x: "col-resize",
       y: "row-resize"
-    }[this.orientation];
+    }[o];
     mouse_pos_prop = {
       x: "clientX",
       y: "clientY"
-    }[this.orientation];
-    offset_prop_start = {
+    }[o];
+    _d1_start = {
       x: "left",
       y: "top"
-    }[this.orientation];
-    offset_prop_end = {
+    }[o];
+    _d1_end = {
       x: "right",
       y: "bottom"
-    }[this.orientation];
-    this.$resizers.remove();
-    this.$resizers = $();
+    }[o];
+    parent_pane.$resizers.remove();
+    parent_pane.$resizers = $();
     _results = [];
     for (i = _j = 1, _ref1 = parent_pane.children.length - 1; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 1 <= _ref1 ? ++_j : --_j) {
       before = parent_pane.children[i - 1];
@@ -129,10 +130,11 @@ PanesPane = (function(_super) {
           $("body").addClass("dragging");
           mousemove = function(e) {
             var after_end, b, before_start, mouse_pos, pane, total_size, _k, _len1, _ref2, _results1;
-            before_start = before.$[0].getBoundingClientRect()[offset_prop_start];
-            after_end = after.$[0].getBoundingClientRect()[offset_prop_end];
+            before_start = before.$[0].getBoundingClientRect()[_d1_start];
+            after_end = after.$[0].getBoundingClientRect()[_d1_end];
             b = resizer_width / 2 + 1;
-            mouse_pos = Math.max(before_start + b, Math.min(after_end - b, e[mouse_pos_prop]));
+            mouse_pos = e[mouse_pos_prop];
+            mouse_pos = Math.max(before_start + b, Math.min(after_end - b, mouse_pos));
             before.$.css(_d1, mouse_pos - before_start - resizer_width / 2);
             after.$.css(_d1, after_end - mouse_pos - resizer_width / 2);
             before.layout();

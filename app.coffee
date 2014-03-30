@@ -37,43 +37,44 @@ class PanesPane extends Pane
 		@layout()
 	
 	layout: ->
+		parent_pane = @
+		o = @orientation
 		
 		# css property `display` for orientation
-		display = (x:"inline-block", y:"block")[@orientation]
+		display = (x:"inline-block", y:"block")[o]
 		
 		# primary dimension which is divided between the children
-		_d1 = (x:"width", y:"height")[@orientation]
+		_d1 = (x:"width", y:"height")[o]
 		
 		# secondary dimension which is the same for the parent and all children
-		_d2 = (x:"height", y:"width")[@orientation]
+		_d2 = (x:"height", y:"width")[o]
 		
 		
 		# get the dimensions of the parent
-		pd1 = @$[_d1]()
-		pd2 = @$[_d2]()
+		pd1 = parent_pane.$[_d1]()
+		pd2 = parent_pane.$[_d2]()
 		
-		n_children = @children.length
+		n_children = parent_pane.children.length
 		n_resizers = Math.max(0, n_children - 1)
 		
-		parent_pane = @
 		space_to_distribute_in_d1 = pd1 - resizer_width * n_resizers
-		for child_pane in @children
+		for child_pane in parent_pane.children
 			child_pane_size = child_pane.flex / n_children * space_to_distribute_in_d1
 			child_pane.$.css _d1, child_pane_size
 			child_pane.$.css _d2, pd2
 			child_pane.$.css {display}
 			child_pane.layout()
 		
-		resize_cursor = (x:"col-resize", y:"row-resize")[@orientation]
+		resize_cursor = (x:"col-resize", y:"row-resize")[o]
 		
-		mouse_pos_prop = (x:"clientX", y:"clientY")[@orientation]
+		mouse_pos_prop = (x:"clientX", y:"clientY")[o]
 		
-		offset_prop_start = (x:"left", y:"top")[@orientation]
-		offset_prop_end = (x:"right", y:"bottom")[@orientation]
+		_d1_start = (x:"left", y:"top")[o]
+		_d1_end = (x:"right", y:"bottom")[o]
 		
 		
-		@$resizers.remove()
-		@$resizers = $()
+		parent_pane.$resizers.remove()
+		parent_pane.$resizers = $()
 		
 		for i in [1..parent_pane.children.length-1]
 			before = parent_pane.children[i - 1]
@@ -91,11 +92,12 @@ class PanesPane extends Pane
 					$("body").addClass "dragging"
 					
 					mousemove = (e)->
-						before_start = before.$[0].getBoundingClientRect()[offset_prop_start]
-						after_end = after.$[0].getBoundingClientRect()[offset_prop_end]
+						before_start = before.$[0].getBoundingClientRect()[_d1_start]
+						after_end = after.$[0].getBoundingClientRect()[_d1_end]
 						
 						b = resizer_width / 2 + 1
-						mouse_pos = Math.max(before_start+b, Math.min(after_end-b, e[mouse_pos_prop]))
+						mouse_pos = e[mouse_pos_prop]
+						mouse_pos = Math.max(before_start+b, Math.min(after_end-b, mouse_pos))
 						
 						before.$.css _d1, mouse_pos - before_start - resizer_width / 2
 						after.$.css _d1, after_end - mouse_pos - resizer_width / 2
