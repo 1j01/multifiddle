@@ -7,7 +7,6 @@ code_previous = {}
 coffee_body = ""
 
 $G = $(G = window)
-$body = $()
 
 E = (tagname)-> document.createElement tagname
 
@@ -86,7 +85,7 @@ class PanesPane extends Pane
 				
 				$resizer.on "mousedown", (e)->
 					e.preventDefault()
-					$body.addClass("dragging")
+					$("body").addClass "dragging"
 					
 					mousemove = (e)->
 						before_start = before.$[0].getBoundingClientRect()[offset_prop_start]
@@ -109,15 +108,15 @@ class PanesPane extends Pane
 					$G.on "mousemove", mousemove
 					$G.on "mouseup", ->
 						$G.off "mousemove", mousemove
-						$body.removeClass("dragging")
+						$("body").removeClass "dragging"
 				
-				parent_pane.$resizers = parent_pane.$resizers.add($resizer)
+				parent_pane.$resizers = parent_pane.$resizers.add $resizer
 			
 			)(before, after)
 		
 	
 	add: (pane)->
-		@$.append(pane.$)
+		@$.append pane.$
 		@children.push pane
 
 class PreviewPane extends Pane
