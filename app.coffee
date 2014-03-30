@@ -1,6 +1,9 @@
 
 resizer_width = 10
 
+project = 
+	languages: ["coffee", "css", "html"]
+
 code = {}
 $code = $(code)
 code_previous = {}
@@ -215,7 +218,14 @@ class EditorPane extends Pane
 		
 		trigger_code_change = ->
 			code[lang] = editor.getValue()
-			$code.triggerHandler "change", lang
+			
+			all_languages_are_there = true
+			for expected_lang in project.languages
+				if not code[expected_lang]?
+					all_languages_are_there = false
+			
+			if all_languages_are_there
+				$code.triggerHandler "change", lang
 		
 		$pad = $(E 'div')
 		$pad.appendTo $pane
@@ -304,9 +314,9 @@ $ ->
 	main_pane = new PanesPane orientation: "y"
 	main_pane.add top_pane = new PanesPane orientation: "x"
 	main_pane.add bottom_pane = new PanesPane orientation: "x"
-	top_pane.add new EditorPane lang: "coffee"
-	top_pane.add new EditorPane lang: "css"
-	bottom_pane.add new EditorPane lang: "html"
+	top_pane.add new EditorPane lang: project.languages[0]
+	top_pane.add new EditorPane lang: project.languages[1]
+	bottom_pane.add new EditorPane lang: project.languages[2]
 	bottom_pane.add new PreviewPane
 	
 	$body.append main_pane.$
