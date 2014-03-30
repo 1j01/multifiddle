@@ -169,16 +169,16 @@ PreviewPane = (function(_super) {
   __extends(PreviewPane, _super);
 
   function PreviewPane() {
-    var $iframe, $pane;
+    var $iframe, $pane, iframe;
     PreviewPane.__super__.constructor.call(this);
     this.$.addClass("preview-pane");
     $pane = this.$;
-    $iframe = $(E('iframe')).attr({
-      sandbox: "allow-scripts allow-forms"
+    $iframe = $(iframe = E('iframe')).attr({
+      sandbox: "allow-same-origin allow-scripts allow-forms"
     });
     $iframe.appendTo($pane);
     $code.on("change", function() {
-      var body, data_uri, e, error_handling, head, html, iframe, js;
+      var body, c, data_uri, e, error_handling, head, html, js, _i, _len, _results;
       $pane.loading();
       head = body = "";
       error_handling = function() {
@@ -214,27 +214,32 @@ PreviewPane = (function(_super) {
             }
           })();
         }
-        code_previous.coffee = code.coffee;
+        body += coffee_body;
       }
       html = "<!doctype html>\n<html>\n	<head>\n		<meta charset=\"utf-8\">\n		" + head + "\n	</head>\n	<body style='background:black;color:white;'>\n		" + body + "\n	</body>\n</html>";
       $iframe.one("load", function() {
         return $pane.loading("done");
       });
       if (typeof $iframe[0].srcdoc === "string") {
-        return $iframe.attr({
+        $iframe.attr({
           srcdoc: html
         });
       } else {
         data_uri = "data:text/html," + encodeURI(html);
-        iframe = $iframe[0];
         if (iframe.contentWindow) {
-          return iframe.contentWindow.location.replace(data_uri);
+          iframe.contentWindow.location.replace(data_uri);
         } else {
-          return $iframe.attr({
+          $iframe.attr({
             src: data_uri
           });
         }
       }
+      _results = [];
+      for (_i = 0, _len = code.length; _i < _len; _i++) {
+        c = code[_i];
+        _results.push(code_previous = c);
+      }
+      return _results;
     });
   }
 

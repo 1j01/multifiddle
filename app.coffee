@@ -128,7 +128,7 @@ class PreviewPane extends Pane
 		@$.addClass("preview-pane")
 		$pane = @$
 		
-		$iframe = $(E 'iframe').attr(sandbox:"allow-scripts allow-forms")
+		$iframe = $(iframe = E 'iframe').attr(sandbox:"allow-same-origin allow-scripts allow-forms")
 		$iframe.appendTo $pane
 		$code.on "change", ->
 			$pane.loading()
@@ -178,7 +178,8 @@ class PreviewPane extends Pane
 							<h4 class='error'>CoffeeScript Compilation Error</h4>
 							<p>#{e.message}</p>
 							"""
-				code_previous.coffee = code.coffee
+				body += coffee_body
+			
 			html = """
 				<!doctype html>
 				<html>
@@ -200,11 +201,12 @@ class PreviewPane extends Pane
 				# note: data URIs are limited to ~32k characters
 				data_uri = "data:text/html," + encodeURI(html)
 				
-				iframe = $iframe[0]
 				if iframe.contentWindow
 					iframe.contentWindow.location.replace data_uri
 				else
 					$iframe.attr src: data_uri
+			
+			code_previous = c for c in code
 
 class EditorPane extends Pane
 	@s = []
