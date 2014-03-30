@@ -128,7 +128,7 @@ class PreviewPane extends Pane
 		
 		$iframe = $(iframe = E 'iframe').attr(sandbox:"allow-same-origin allow-scripts allow-forms")
 		$iframe.appendTo $pane
-		$code.on "change", ->
+		$code.on "change", (e, lang)->
 			$pane.loading()
 			
 			head = body = ""
@@ -214,6 +214,10 @@ class EditorPane extends Pane
 		@$.addClass "editor-pane"
 		$pane = @$
 		
+		trigger_code_change = ->
+			code[lang] = editor.getValue()
+			$code.triggerHandler "change", lang
+		
 		$pad = $(E 'div')
 		$pad.appendTo $pane
 		
@@ -224,9 +228,7 @@ class EditorPane extends Pane
 		
 		# Create ACE
 		editor = @editor = ace.edit $pad[0]
-		editor.on 'change', ->
-			code[lang] = editor.getValue()
-			$code.triggerHandler "change"
+		editor.on 'change', trigger_code_change
 		
 		session = editor.getSession()
 		editor.setShowPrintMargin no
@@ -242,6 +244,7 @@ class EditorPane extends Pane
 		
 		# Initialize contents
 		firepad.on 'ready', ->
+			trigger_code_change()
 			$pane.loading "done"
 			editor.setReadOnly no
 			if firepad.isHistoryEmpty()

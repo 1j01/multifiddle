@@ -177,8 +177,8 @@ PreviewPane = (function(_super) {
       sandbox: "allow-same-origin allow-scripts allow-forms"
     });
     $iframe.appendTo($pane);
-    $code.on("change", function() {
-      var body, c, data_uri, e, error_handling, head, html, js, _i, _len, _results;
+    $code.on("change", function(e, lang) {
+      var body, c, data_uri, error_handling, head, html, js, _i, _len, _results;
       $pane.loading();
       head = body = "";
       error_handling = function() {
@@ -253,21 +253,22 @@ EditorPane = (function(_super) {
   EditorPane.s = [];
 
   function EditorPane(_arg) {
-    var $pad, $pane, editor, fb_fp, firepad, lang, session;
+    var $pad, $pane, editor, fb_fp, firepad, lang, session, trigger_code_change;
     lang = _arg.lang;
     EditorPane.s.push(this);
     EditorPane.__super__.constructor.call(this);
     this.$.addClass("editor-pane");
     $pane = this.$;
+    trigger_code_change = function() {
+      code[lang] = editor.getValue();
+      return $code.triggerHandler("change", lang);
+    };
     $pad = $(E('div'));
     $pad.appendTo($pane);
     $pane.loading();
     fb_fp = fb_project.child(lang);
     editor = this.editor = ace.edit($pad[0]);
-    editor.on('change', function() {
-      code[lang] = editor.getValue();
-      return $code.triggerHandler("change");
-    });
+    editor.on('change', trigger_code_change);
     session = editor.getSession();
     editor.setShowPrintMargin(false);
     editor.setReadOnly(true);
@@ -279,6 +280,7 @@ EditorPane = (function(_super) {
     firepad = Firepad.fromACE(fb_fp, editor);
     firepad.on('ready', function() {
       var _ref;
+      trigger_code_change();
       $pane.loading("done");
       editor.setReadOnly(false);
       if (firepad.isHistoryEmpty()) {
