@@ -89,10 +89,11 @@ class PanesPane extends Pane
 					$body.addClass("dragging")
 					
 					mousemove = (e)->
-						mouse_pos = e[mouse_pos_prop]
-						
 						before_start = before.$[0].getBoundingClientRect()[offset_prop_start]
 						after_end = after.$[0].getBoundingClientRect()[offset_prop_end]
+						
+						b = resizer_width / 2 + 1
+						mouse_pos = Math.max(before_start+b, Math.min(after_end-b, e[mouse_pos_prop]))
 						
 						before.$.css _d1, mouse_pos - before_start - resizer_width / 2
 						after.$.css _d1, after_end - mouse_pos - resizer_width / 2

@@ -126,10 +126,11 @@ PanesPane = (function(_super) {
           e.preventDefault();
           $body.addClass("dragging");
           mousemove = function(e) {
-            var after_end, before_start, mouse_pos, pane, total_size, _k, _len1, _ref2, _results1;
-            mouse_pos = e[mouse_pos_prop];
+            var after_end, b, before_start, mouse_pos, pane, total_size, _k, _len1, _ref2, _results1;
             before_start = before.$[0].getBoundingClientRect()[offset_prop_start];
             after_end = after.$[0].getBoundingClientRect()[offset_prop_end];
+            b = resizer_width / 2 + 1;
+            mouse_pos = Math.max(before_start + b, Math.min(after_end - b, e[mouse_pos_prop]));
             before.$.css(_d1, mouse_pos - before_start - resizer_width / 2);
             after.$.css(_d1, after_end - mouse_pos - resizer_width / 2);
             before.layout();
