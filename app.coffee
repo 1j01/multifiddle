@@ -40,15 +40,22 @@ class PanesPane extends Pane
 		parent_pane = @
 		o = @orientation
 		
-		# css property `display` for orientation
+		# orientation
 		display = (x:"inline-block", y:"block")[o]
+		_col_row = (x:"col", y:"row")[o]
 		
 		# primary dimension which is divided between the children
 		_d1 = (x:"width", y:"height")[o]
+		_d1_start = (x:"left", y:"top")[o]
+		_d1_end = (x:"right", y:"bottom")[o]
 		
 		# secondary dimension which is the same for the parent and all children
 		_d2 = (x:"height", y:"width")[o]
+		_d2_start = (x:"top", y:"left")[o]
+		_d2_end = (x:"bottom", y:"right")[o]
 		
+		# property of mouse events to get the mouse position in the primary dimension
+		_mouse_d1 = (x:"clientX", y:"clientY")[o]
 		
 		# get the dimensions of the parent
 		pd1 = parent_pane.$[_d1]()
@@ -65,12 +72,6 @@ class PanesPane extends Pane
 			child_pane.$.css {display}
 			child_pane.layout()
 		
-		resize_cursor = (x:"col-resize", y:"row-resize")[o]
-		
-		mouse_pos_prop = (x:"clientX", y:"clientY")[o]
-		
-		_d1_start = (x:"left", y:"top")[o]
-		_d1_end = (x:"right", y:"bottom")[o]
 		
 		
 		parent_pane.$resizers.remove()
@@ -80,12 +81,12 @@ class PanesPane extends Pane
 			before = parent_pane.children[i - 1]
 			after = parent_pane.children[i]
 			((before, after)->
-				$resizer = $(E "div").addClass("resizer #{resize_cursor}r")
+				$resizer = $(E "div").addClass("resizer #{_col_row}-resizer")
 				$resizer.insertAfter(before.$)
 				$resizer.css _d1, resizer_width
 				$resizer.css _d2, pd2
 				$resizer.css {display}
-				$resizer.css cursor: resize_cursor
+				$resizer.css cursor: "#{_col_row}-resize"
 				
 				$resizer.on "mousedown", (e)->
 					e.preventDefault()
@@ -96,7 +97,7 @@ class PanesPane extends Pane
 						after_end = after.$[0].getBoundingClientRect()[_d1_end]
 						
 						b = resizer_width / 2 + 1
-						mouse_pos = e[mouse_pos_prop]
+						mouse_pos = e[_mouse_d1]
 						mouse_pos = Math.max(before_start+b, Math.min(after_end-b, mouse_pos))
 						
 						before.$.css _d1, mouse_pos - before_start - resizer_width / 2

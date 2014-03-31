@@ -59,20 +59,44 @@ PanesPane = (function(_super) {
   };
 
   PanesPane.prototype.layout = function() {
-    var after, before, child_pane, child_pane_size, display, i, mouse_pos_prop, n_children, n_resizers, o, parent_pane, pd1, pd2, resize_cursor, space_to_distribute_in_d1, _d1, _d1_end, _d1_start, _d2, _i, _j, _len, _ref, _ref1, _results;
+    var after, before, child_pane, child_pane_size, display, i, n_children, n_resizers, o, parent_pane, pd1, pd2, space_to_distribute_in_d1, _col_row, _d1, _d1_end, _d1_start, _d2, _d2_end, _d2_start, _i, _j, _len, _mouse_d1, _ref, _ref1, _results;
     parent_pane = this;
     o = this.orientation;
     display = {
       x: "inline-block",
       y: "block"
     }[o];
+    _col_row = {
+      x: "col",
+      y: "row"
+    }[o];
     _d1 = {
       x: "width",
       y: "height"
     }[o];
+    _d1_start = {
+      x: "left",
+      y: "top"
+    }[o];
+    _d1_end = {
+      x: "right",
+      y: "bottom"
+    }[o];
     _d2 = {
       x: "height",
       y: "width"
+    }[o];
+    _d2_start = {
+      x: "top",
+      y: "left"
+    }[o];
+    _d2_end = {
+      x: "bottom",
+      y: "right"
+    }[o];
+    _mouse_d1 = {
+      x: "clientX",
+      y: "clientY"
     }[o];
     pd1 = parent_pane.$[_d1]();
     pd2 = parent_pane.$[_d2]();
@@ -90,22 +114,6 @@ PanesPane = (function(_super) {
       });
       child_pane.layout();
     }
-    resize_cursor = {
-      x: "col-resize",
-      y: "row-resize"
-    }[o];
-    mouse_pos_prop = {
-      x: "clientX",
-      y: "clientY"
-    }[o];
-    _d1_start = {
-      x: "left",
-      y: "top"
-    }[o];
-    _d1_end = {
-      x: "right",
-      y: "bottom"
-    }[o];
     parent_pane.$resizers.remove();
     parent_pane.$resizers = $();
     _results = [];
@@ -114,7 +122,7 @@ PanesPane = (function(_super) {
       after = parent_pane.children[i];
       _results.push((function(before, after) {
         var $resizer;
-        $resizer = $(E("div")).addClass("resizer " + resize_cursor + "r");
+        $resizer = $(E("div")).addClass("resizer " + _col_row + "-resizer");
         $resizer.insertAfter(before.$);
         $resizer.css(_d1, resizer_width);
         $resizer.css(_d2, pd2);
@@ -122,7 +130,7 @@ PanesPane = (function(_super) {
           display: display
         });
         $resizer.css({
-          cursor: resize_cursor
+          cursor: "" + _col_row + "-resize"
         });
         $resizer.on("mousedown", function(e) {
           var mousemove;
@@ -133,7 +141,7 @@ PanesPane = (function(_super) {
             before_start = before.$[0].getBoundingClientRect()[_d1_start];
             after_end = after.$[0].getBoundingClientRect()[_d1_end];
             b = resizer_width / 2 + 1;
-            mouse_pos = e[mouse_pos_prop];
+            mouse_pos = e[_mouse_d1];
             mouse_pos = Math.max(before_start + b, Math.min(after_end - b, mouse_pos));
             before.$.css(_d1, mouse_pos - before_start - resizer_width / 2);
             after.$.css(_d1, after_end - mouse_pos - resizer_width / 2);
