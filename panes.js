@@ -115,7 +115,7 @@ PanesPane = (function(_super) {
       before = parent_pane.children[i - 1];
       after = parent_pane.children[i];
       _results.push((function(before, after) {
-        var $resizer;
+        var $more_resizers, $resizer;
         $resizer = $(E("div")).addClass("resizer " + _col_row + "-resizer");
         $resizer.insertAfter(before.$);
         $resizer.css(_d1, resizer_size);
@@ -126,10 +126,37 @@ PanesPane = (function(_super) {
         $resizer.css({
           cursor: "" + _col_row + "-resize"
         });
-        $resizer.on("mousedown", function(e) {
+        $more_resizers = $();
+        $resizer.on("mouseover mousemove", function(e) {
+          if (!$resizer.hasClass("drag")) {
+            $more_resizers = $();
+            return $(".resizer").each(function(i, res_el) {
+              var rect, _ref2;
+              if ($resizer[0] === res_el) {
+                return;
+              }
+              if (!$.contains(parent_pane.$[0], res_el)) {
+                return;
+              }
+              rect = res_el.getBoundingClientRect();
+              if ((rect[_d2_start] < (_ref2 = e[_mouse_d2]) && _ref2 < rect[_d2_end])) {
+                return $more_resizers = $more_resizers.add(res_el);
+              }
+            });
+          }
+        });
+        $resizer.on("mouseout", function(e) {
+          if (!$resizer.hasClass("drag")) {
+            return $more_resizers = $();
+          }
+        });
+        $resizer.on("mousedown", function(e, synthetic) {
           var mousemove;
           e.preventDefault();
+          $resizer.addClass("drag");
+          $more_resizers.addClass("drag");
           $("body").addClass("dragging");
+          $more_resizers.trigger(e, "synthetic");
           mousemove = function(e) {
             var after_end, b, before_start, mouse_pos, pane, total_size, _k, _len1, _ref2, _results1;
             before_start = before.$[0].getBoundingClientRect()[_d1_start];
@@ -153,7 +180,9 @@ PanesPane = (function(_super) {
           $G.on("mousemove", mousemove);
           return $G.on("mouseup", function() {
             $G.off("mousemove", mousemove);
-            return $("body").removeClass("dragging");
+            $("body").removeClass("dragging col-resizing row-resizing multi-resizing");
+            $resizer.removeClass("drag");
+            return $more_resizers.removeClass("drag");
           });
         });
         return parent_pane.$resizers = parent_pane.$resizers.add($resizer);
@@ -328,7 +357,6 @@ EditorPane = (function(_super) {
   };
 
   EditorPane.prototype.destroy = function() {
-    console.log("cleaning up editor");
     return this.editor.destroy();
   };
 

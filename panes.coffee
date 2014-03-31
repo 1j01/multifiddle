@@ -80,9 +80,29 @@ class PanesPane extends Pane
 				$resizer.css {display}
 				$resizer.css cursor: "#{_col_row}-resize"
 				
-				$resizer.on "mousedown", (e)->
+				$more_resizers = $()
+				$resizer.on "mouseover mousemove", (e)->
+					if not $resizer.hasClass "drag"
+						$more_resizers = $()
+						$(".resizer").each (i, res_el)->
+							if $resizer[0] is res_el then return
+							if not $.contains parent_pane.$[0], res_el then return
+							
+							rect = res_el.getBoundingClientRect()
+							
+							if rect[_d2_start] < e[_mouse_d2] < rect[_d2_end]
+								$more_resizers = $more_resizers.add(res_el)
+				
+				$resizer.on "mouseout", (e)->
+					if not $resizer.hasClass "drag"
+						$more_resizers = $()
+				
+				$resizer.on "mousedown", (e, synthetic)->
 					e.preventDefault()
+					$resizer.addClass "drag"
+					$more_resizers.addClass "drag"
 					$("body").addClass "dragging"
+					$more_resizers.trigger(e, "synthetic")
 					
 					mousemove = (e)->
 						before_start = before.$[0].getBoundingClientRect()[_d1_start]
@@ -106,7 +126,9 @@ class PanesPane extends Pane
 					$G.on "mousemove", mousemove
 					$G.on "mouseup", ->
 						$G.off "mousemove", mousemove
-						$("body").removeClass "dragging"
+						$("body").removeClass "dragging col-resizing row-resizing multi-resizing"
+						$resizer.removeClass "drag"
+						$more_resizers.removeClass "drag"
 				
 				parent_pane.$resizers = parent_pane.$resizers.add $resizer
 			
@@ -301,5 +323,5 @@ class EditorPane extends Pane
 		@editor.resize()
 	
 	destroy: ->
-		console.log "cleaning up editor"
+		#console.debug "cleaning up editor"
 		@editor.destroy()
