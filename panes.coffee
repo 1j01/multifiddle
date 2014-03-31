@@ -92,6 +92,8 @@ class PanesPane extends Pane
 							
 							if rect[_d2_start] < e[_mouse_d2] < rect[_d2_end]
 								$more_resizers = $more_resizers.add(res_el)
+						
+						$resizer.css cursor:  (if $more_resizers.length then "move" else "#{_col_row}-resize")
 				
 				$resizer.on "mouseout", (e)->
 					if not $resizer.hasClass "drag"
@@ -102,6 +104,8 @@ class PanesPane extends Pane
 					$resizer.addClass "drag"
 					$more_resizers.addClass "drag"
 					$("body").addClass "dragging"
+					if not synthetic
+						$("body").addClass (if $more_resizers.length then "multi" else _col_row) + "-resizing"
 					$more_resizers.trigger(e, "synthetic")
 					
 					mousemove = (e)->

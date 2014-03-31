@@ -130,7 +130,7 @@ PanesPane = (function(_super) {
         $resizer.on("mouseover mousemove", function(e) {
           if (!$resizer.hasClass("drag")) {
             $more_resizers = $();
-            return $(".resizer").each(function(i, res_el) {
+            $(".resizer").each(function(i, res_el) {
               var rect, _ref2;
               if ($resizer[0] === res_el) {
                 return;
@@ -142,6 +142,9 @@ PanesPane = (function(_super) {
               if ((rect[_d2_start] < (_ref2 = e[_mouse_d2]) && _ref2 < rect[_d2_end])) {
                 return $more_resizers = $more_resizers.add(res_el);
               }
+            });
+            return $resizer.css({
+              cursor: ($more_resizers.length ? "move" : "" + _col_row + "-resize")
             });
           }
         });
@@ -156,6 +159,9 @@ PanesPane = (function(_super) {
           $resizer.addClass("drag");
           $more_resizers.addClass("drag");
           $("body").addClass("dragging");
+          if (!synthetic) {
+            $("body").addClass(($more_resizers.length ? "multi" : _col_row) + "-resizing");
+          }
           $more_resizers.trigger(e, "synthetic");
           mousemove = function(e) {
             var after_end, b, before_start, mouse_pos, pane, total_size, _k, _len1, _ref2, _results1;
