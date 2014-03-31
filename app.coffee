@@ -1,13 +1,10 @@
 
-resizer_width = 10
+resizer_size = 10
 
 project = 
 	languages: ["coffee", "css", "html"]
 
-code = {}
-$code = $(code)
-code_previous = {}
-coffee_body = ""
+project.$codes = $(project.codes = {})
 
 $G = $(G = window)
 
@@ -54,21 +51,19 @@ class PanesPane extends Pane
 		_d2_start = (x:"top", y:"left")[o]
 		_d2_end = (x:"bottom", y:"right")[o]
 		
-		# property of mouse events to get the mouse position in the primary dimension
+		# properties of mouse events to get the mouse position
 		_mouse_d1 = (x:"clientX", y:"clientY")[o]
+		_mouse_d2 = (x:"clientY", y:"clientX")[o]
 		
-		# get the dimensions of the parent
-		pd1 = parent_pane.$[_d1]()
-		pd2 = parent_pane.$[_d2]()
 		
 		n_children = parent_pane.children.length
 		n_resizers = Math.max(0, n_children - 1)
 		
-		space_to_distribute_in_d1 = pd1 - resizer_width * n_resizers
+		space_to_distribute_in_d1 = parent_pane.$[_d1]() - resizer_size * n_resizers
 		for child_pane in parent_pane.children
 			child_pane_size = child_pane.flex / n_children * space_to_distribute_in_d1
 			child_pane.$.css _d1, child_pane_size
-			child_pane.$.css _d2, pd2
+			child_pane.$.css _d2, parent_pane.$[_d2]()
 			child_pane.$.css {display}
 			child_pane.layout()
 		
@@ -83,8 +78,8 @@ class PanesPane extends Pane
 			((before, after)->
 				$resizer = $(E "div").addClass("resizer #{_col_row}-resizer")
 				$resizer.insertAfter(before.$)
-				$resizer.css _d1, resizer_width
-				$resizer.css _d2, pd2
+				$resizer.css _d1, resizer_size
+				$resizer.css _d2, parent_pane.$[_d2]()
 				$resizer.css {display}
 				$resizer.css cursor: "#{_col_row}-resize"
 				
@@ -96,18 +91,18 @@ class PanesPane extends Pane
 						before_start = before.$[0].getBoundingClientRect()[_d1_start]
 						after_end = after.$[0].getBoundingClientRect()[_d1_end]
 						
-						b = resizer_width / 2 + 1
+						b = resizer_size / 2 + 1
 						mouse_pos = e[_mouse_d1]
 						mouse_pos = Math.max(before_start+b, Math.min(after_end-b, mouse_pos))
 						
-						before.$.css _d1, mouse_pos - before_start - resizer_width / 2
-						after.$.css _d1, after_end - mouse_pos - resizer_width / 2
+						before.$.css _d1, mouse_pos - before_start - resizer_size / 2
+						after.$.css _d1, after_end - mouse_pos - resizer_size / 2
 						
 						before.layout()
 						after.layout()
 						
 						# calculate flex values
-						total_size = (pd1) - (resizer_width * n_resizers)
+						total_size = (parent_pane.$[_d1]()) - (resizer_size * n_resizers)
 						for pane in parent_pane.children
 							pane.flex = pane.$[_d1]() / total_size * n_children
 					
@@ -130,10 +125,23 @@ class PreviewPane extends Pane
 		super()
 		@$.addClass "preview-pane"
 		$pane = @$
+		@_codes_previous = {}
+		@_coffee_body = ""
 		
 		$iframe = $(iframe = E 'iframe').attr(sandbox:"allow-same-origin allow-scripts allow-forms")
 		$iframe.appendTo $pane
-		$code.on "change", (e, lang)->
+		project.$codes.on "change", (e, lang)=>
+			{codes} = project
+			
+			all_languages_are_there = true
+			for expected_lang in project.languages
+				if not codes[expected_lang]?
+					all_languages_are_there = false
+			
+			if not all_languages_are_there
+				return
+			
+			
 			$pane.loading()
 			
 			head = body = ""
@@ -164,24 +172,24 @@ class PreviewPane extends Pane
 				</style>
 			"""
 			
-			if code.html
-				body += code.html
-			if code.css
-				head += "<style>#{code.css}</style>"
-			if code.javascript
-				body += "<script>#{code.javascript}</script>"
-			if code.coffee
-				if code.coffee != code_previous.coffee
-					coffee_body =
+			if codes.html
+				body += codes.html
+			if codes.css
+				head += "<style>#{codes.css}</style>"
+			if codes.javascript
+				body += "<script>#{codes.javascript}</script>"
+			if codes.coffee
+				if codes.coffee != @_codes_previous.coffee
+					@_coffee_body =
 						try
-							js = CoffeeScript.compile code.coffee
+							js = CoffeeScript.compile codes.coffee
 							"<script>#{js}</script>"
 						catch e
 							"""
 							<h4 class='error'>CoffeeScript Compilation Error</h4>
 							<p>#{e.message}</p>
 							"""
-				body += coffee_body
+				body += @_coffee_body
 			
 			html = """
 				<!doctype html>
@@ -209,7 +217,8 @@ class PreviewPane extends Pane
 				else
 					$iframe.attr src: data_uri
 			
-			code_previous = c for c in code
+			$.each codes, (lang, code)=>
+				@_codes_previous[lang] = code
 
 class EditorPane extends Pane
 	@s = []
@@ -220,15 +229,8 @@ class EditorPane extends Pane
 		$pane = @$
 		
 		trigger_code_change = ->
-			code[lang] = editor.getValue()
-			
-			all_languages_are_there = true
-			for expected_lang in project.languages
-				if not code[expected_lang]?
-					all_languages_are_there = false
-			
-			if all_languages_are_there
-				$code.triggerHandler "change", lang
+			project.codes[lang] = editor.getValue()
+			project.$codes.triggerHandler "change", lang
 		
 		$pad = $(E 'div')
 		$pad.appendTo $pane
