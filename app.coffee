@@ -22,8 +22,8 @@ class Project
 			
 			$body.append @main_pane.$
 			
-			$G.on "resize", @layout
-			@layout()
+			$G.on "resize", => @main_pane.layout()
+			@main_pane.layout()
 			
 			{themes, themesByName} = ace.require "ace/ext/themelist"
 			
@@ -41,11 +41,8 @@ class Project
 			setTheme "tomorrow_night_bright"
 			console.log themes #todo: list themes, have options
 	
-	layout: ->
-		@main_pane.layout()
-		$G.off "resize", @layout
-	
 	exit: ->
+		$G.off()
 		@main_pane.destroy()
 		@main_pane.$.remove()
 

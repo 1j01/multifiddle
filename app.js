@@ -41,8 +41,10 @@ Project = (function() {
         project: _this
       }));
       $body.append(_this.main_pane.$);
-      $G.on("resize", _this.layout);
-      _this.layout();
+      $G.on("resize", function() {
+        return _this.main_pane.layout();
+      });
+      _this.main_pane.layout();
       _ref = ace.require("ace/ext/themelist"), themes = _ref.themes, themesByName = _ref.themesByName;
       setTheme = function(theme_name) {
         var edpane, theme, _i, _len, _ref1, _results;
@@ -65,12 +67,8 @@ Project = (function() {
     });
   }
 
-  Project.prototype.layout = function() {
-    this.main_pane.layout();
-    return $G.off("resize", this.layout);
-  };
-
   Project.prototype.exit = function() {
+    $G.off();
     this.main_pane.destroy();
     return this.main_pane.$.remove();
   };
