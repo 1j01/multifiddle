@@ -1,0 +1,27 @@
+{
+	"name": "multifiddle",
+	"version": "0.0.1",
+	"author": "Isaiah Odhner",
+	"description": "a minimalistic multilingual collaborative fiddle",
+	"scripts": {
+		"start": "index.html",
+		"build": "cake sbuild"
+	},
+	"main": "index.html",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/1j01/multifiddle.git"
+	},
+	"keywords": [
+		"fiddle",
+		"multi",
+		"collaborative",
+		"app"
+	],
+	"dependencies": {},
+	"devDependencies": {
+		"mkdirp": "~0.3.5",
+		"coffee-script": "~1.7.1"
+	},
+	"private": true
+}

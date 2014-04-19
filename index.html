@@ -3,11 +3,12 @@
 <title>MultiFiddle</title>
 
 <style>
+	html,body.dark{background:#000}
 	html,body,.firepad,.ace_editor,.pane,iframe{width:100%;height:100%;padding:0;margin:0;border:0;overflow:hidden}
 	iframe{overflow:auto}
-	html,body.dark{background:#000}
+	/*.pane{overflow:visible} this breaks the layout and makes it look all pretty*/
+	.editor-pane,.preview-pane{box-shadow:0 0 1px rgba(255,255,255,0.5)}
 	.dragging iframe{pointer-events:none}
-	.pane{box-shadow:0 0 2px rgba(255,255,255,0.5)}
 	.col-resizing *{cursor:col-resize !important}
 	.row-resizing *{cursor:row-resize !important}
 	.multi-resizing *{cursor:move !important}
@@ -27,8 +28,8 @@
 
 <script src='lib/coffee-script.js'></script>
 
-<script src='loading.js'></script>
-<script src='panes.js'></script>
-<script src='app.js'></script>
+<script src='build/loading.js'></script>
+<script src='build/panes.js'></script>
+<script src='build/app.js'></script>
 
 </head><body></body></html>

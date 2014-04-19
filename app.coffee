@@ -47,6 +47,7 @@ class Project
 
 
 fb_root = new Firebase "https://multifiddle.firebaseio.com/"
+
 hash = G.location.hash.replace '#', ''
 
 if hash
@@ -57,12 +58,14 @@ else
 
 $ ->
 	project = new Project fb_project
-
+	
 	$G.on "hashchange", ->
 		new_hash = G.location.hash.replace '#', ''
+		console.debug("from", hash, "to", new_hash)
 		if new_hash isnt hash
-			project.exit()
 			hash = new_hash
+			
+			project.exit()
 			
 			fb_project = fb_root.child hash
 			project = new Project fb_project
