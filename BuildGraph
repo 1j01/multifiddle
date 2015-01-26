@@ -1,0 +1,14 @@
+
+                           .--> "build/*.js"  # intermediate builds, optional
+"src/*.coffee" --> coffee -| 
+                           '--> concat -.
+                                        |--> "build/bundle.js"
+                                        |
+                                        '--> uglify -> "build/bundle.min.js"
+
+
+Hmm, time to make a graph editting library
+ to make a visual build tool
+  to simplify building a project
+   that already builds!
+    Yeah, legitest abstraction 2012!

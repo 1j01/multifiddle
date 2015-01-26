@@ -249,7 +249,7 @@ class PreviewPane extends Pane
 
 class EditorPane extends Pane
 	@s = []
-	constructor: ({lang, project})->
+	constructor: ({lang, default_code, project})->
 		EditorPane.s.push @
 		super()
 		@$.addClass "editor-pane"
@@ -289,43 +289,10 @@ class EditorPane extends Pane
 			$pane.loading "done"
 			editor.setReadOnly no
 			if firepad.isHistoryEmpty()
-				firepad.setText (
-					javascript: '''
-						// JavaScript
-						
-						document.write("Hello World!");
-						
-					'''
-					coffee: '''
-						
-						spans = 
-							for char in "Hello World from CoffeeScript!"
-								span = document.createElement("span")
-								document.body.appendChild(span)
-								span.innerHTML = char
-								(span)
-						
-						t = 0
-						rainbow = ->
-							t += 0.05
-							for span, i in spans
-								span.style.color = "hsl(#{
-									Math.sin(t - i / 23) * 360
-								},100%,80%)"
-						
-						setInterval rainbow, 30
-						
-					'''
-					css: '''
-						body {
-							font-family: Helvetica, sans-serif;
-						}
-					'''
-				)[lang] ? ""
+				firepad.setText default_code
 	
 	layout: ->
 		@editor.resize()
 	
 	destroy: ->
-		#console.debug "cleaning up editor"
 		@editor.destroy()
