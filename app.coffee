@@ -3,9 +3,9 @@ $G = $(G = window)
 
 E = (tagname)-> document.createElement tagname
 
-class Project
+class @Project
 	constructor: (@fb)->
-		#todo: load from fb
+		# @TODO: Load from Firebase
 		@languages = ["coffee", "css", "html"]
 		@$codes = $(@codes = {})
 		
@@ -34,11 +34,12 @@ class Project
 			else
 				$body.removeClass "dark"
 			
-			for edpane in EditorPane.s
+			for edpane in EditorPane.instances
 				edpane.editor.setTheme theme.theme
 		
 		setTheme "tomorrow_night_bright"
-		console.log (Object.keys themesByName).join "|" #todo: list themes, have options
+		# console.log "Themes: #{(Object.keys themesByName).join ", "}"
+		# @TODO: list themes, have options
 	
 	exit: ->
 		$G.off()

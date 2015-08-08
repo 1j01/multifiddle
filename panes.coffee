@@ -3,9 +3,9 @@ $G = $(G = window)
 
 E = (tagname)-> document.createElement tagname
 
-hell = (boo)-> boo#yah
+hell = (o_o)-> o_o # i.e. hell yes = yes, hell no = no
 
-class Pane
+class @Pane
 	constructor: ->
 		@$ = $(E 'div')
 		@$.addClass "pane"
@@ -15,7 +15,7 @@ class Pane
 	
 	destroy: ->
 
-class PanesPane extends Pane
+class @PanesPane extends Pane
 	resizer_size = 10
 	
 	constructor: ({orientation})->
@@ -72,7 +72,7 @@ class PanesPane extends Pane
 		for i in [1..parent_pane.children.length-1]
 			before = parent_pane.children[i - 1]
 			after = parent_pane.children[i]
-			((before, after)->
+			do (before, after)->
 				$resizer = $(E "div").addClass("resizer #{_col_row}-resizer")
 				$resizer.insertAfter(before.$)
 				$resizer.css _d1, resizer_size
@@ -135,9 +135,6 @@ class PanesPane extends Pane
 						$more_resizers.removeClass "drag"
 				
 				parent_pane.$resizers = parent_pane.$resizers.add $resizer
-			
-			)(before, after)
-		
 	
 	add: (pane)->
 		@$.append pane.$
@@ -147,7 +144,7 @@ class PanesPane extends Pane
 		for child_pane in @children
 			child_pane.destroy?()
 
-class PreviewPane extends Pane
+class @PreviewPane extends Pane
 	constructor: ({project})->
 		super()
 		@$.addClass "preview-pane"
@@ -165,15 +162,14 @@ class PreviewPane extends Pane
 				if not codes[expected_lang]?
 					all_languages_are_there = false
 			
-			if not all_languages_are_there
-				return
-			
+			return unless all_languages_are_there
 			
 			$pane.loading()
 			
 			head = body = ""
 			
 			error_handling = ->
+				# @TODO: show this outside of the iframe
 				d = document.createElement "div"
 				d.className = "error bubble script-error"
 				window.onerror = (error)->
@@ -212,6 +208,7 @@ class PreviewPane extends Pane
 							js = CoffeeScript.compile codes.coffee
 							"<script>#{js}</script>"
 						catch e
+							# @TODO: show this message outside of the iframe
 							"""
 							<h4 class='error'>CoffeeScript Compilation Error</h4>
 							<p>#{e.message}</p>
@@ -236,8 +233,8 @@ class PreviewPane extends Pane
 			if typeof $iframe[0].srcdoc is "string"
 				$iframe.attr srcdoc: html
 			else
-				# note: data URIs are limited to ~32k characters
-				data_uri = "data:text/html," + encodeURI html
+				# NOTE: data URIs are limited to ~32k characters
+				data_uri = "data:text/html,#{encodeURI html}"
 				
 				if iframe.contentWindow
 					iframe.contentWindow.location.replace data_uri
@@ -247,10 +244,10 @@ class PreviewPane extends Pane
 			$.each codes, (lang, code)=>
 				@_codes_previous[lang] = code
 
-class EditorPane extends Pane
-	@s = []
+class @EditorPane extends Pane
+	@instances = []
 	constructor: ({lang, project})->
-		EditorPane.s.push @
+		EditorPane.instances.push @
 		super()
 		@$.addClass "editor-pane"
 		$pane = @$
@@ -303,7 +300,7 @@ class EditorPane extends Pane
 								span = document.createElement("span")
 								document.body.appendChild(span)
 								span.innerHTML = char
-								(span)
+								span
 						
 						t = 0
 						rainbow = ->
@@ -327,5 +324,5 @@ class EditorPane extends Pane
 		@editor.resize()
 	
 	destroy: ->
-		#console.debug "cleaning up editor"
 		@editor.destroy()
+		EditorPane.instances = (instance for instance in EditorPane.instances when instance isnt @)

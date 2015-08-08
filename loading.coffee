@@ -1,13 +1,13 @@
-(($)->
+do ($ = jQuery)->
 	$.fn.loading = (done)->
 		fallback_image = "http://d1ktyob8e4hu6c.cloudfront.net/static/img/wait.gif"
 		min_size = 32
 		max_size = 100
 		
-		s = max_size #size
-		c = s * 0.5 #center
+		s = max_size # size
+		c = s * 0.5 # center
 		{sin, cos, min, max, PI} = Math
-		TAU = PI * 2 #C/r
+		TAU = PI * 2 # C/r
 		
 		draw = (ctx, t)->
 			
@@ -48,7 +48,7 @@
 				if $indicator
 					$indicator.stop().fadeIn 200
 				else
-					indicator = canvas = document.createElement "canvas"
+					canvas = document.createElement "canvas"
 					$canvas = $(canvas)
 					
 					if canvas.getContext
@@ -59,9 +59,8 @@
 						$indicator = $(img).attr src: fallback_image
 				
 					indicator = $indicator[0]
-					document.body.appendChild indicator
-					
 					indicator.width = indicator.height = s
+					$indicator.appendTo("body")
 					
 					update = ->
 						rect = parent.getBoundingClientRect()
@@ -76,7 +75,7 @@
 						
 						if ctx then draw(ctx, t += 0.3)
 						
-						#if document $.contains indicator
+						# if document contains indicator
 						if $.contains document, indicator
 							setTimeout update, 15
 					
@@ -92,4 +91,3 @@
 					setTimeout start, 15
 					
 					$parent.data d, $indicator
-)(jQuery)
