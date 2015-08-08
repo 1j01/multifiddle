@@ -69,9 +69,7 @@ class @PanesPane extends Pane
 		parent_pane.$resizers.remove()
 		parent_pane.$resizers = $()
 		
-		for i in [1..parent_pane.children.length-1]
-			before = parent_pane.children[i - 1]
-			after = parent_pane.children[i]
+		for before, i in parent_pane.children when after = parent_pane.children[i + 1]
 			do (before, after)->
 				$resizer = $(E "div").addClass("resizer #{_col_row}-resizer")
 				$resizer.insertAfter(before.$)

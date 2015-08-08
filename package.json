@@ -1,12 +1,13 @@
 {
   "name": "multifiddle",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Isaiah Odhner",
   "description": "Minimalistic multilingual collaborative code-fiddling",
   "scripts": {
     "start": "index.html",
+    "prepublish": "coffee -co build .",
     "build": "coffee -co build .",
-    "prepublish": "coffee -co build ."
+    "dev": "coffee -wo build ."
   },
   "main": "index.html",
   "repository": {
