@@ -84,3 +84,54 @@ $ ->
 			what_to_show = new_to_show
 			console?.debug? "show #{new_to_show or "all panes"}"
 			project.show new_to_show
+	
+	$G.on "keydown", (e)->
+		ctrl_m = e.ctrlKey and e.keyCode is 77
+		escape = e.keyCode is 27
+		if escape or ctrl_m
+			if $(".qr-code-popup").length
+				$(".qr-code-popup").remove()
+				return e.preventDefault()
+		if ctrl_m
+			e.preventDefault()
+			
+			output_only_url =
+				if location.origin.match /127\.0\.0\.1|localhost|^file:/
+					"http://1j01.github.io/multifiddle/##{project_id}/output"
+				else
+					"#{location.origin}#{location.pathname}##{project_id}/output"
+			
+			size = 256
+			
+			# create the qrcode itself
+			qrcode = new QRCode(-1, QRErrorCorrectLevel.M)
+			qrcode.addData(output_only_url)
+			qrcode.make()
+			
+			# create canvas
+			canvas = document.createElement "canvas"
+			canvas.width = size
+			canvas.height = size
+			ctx = canvas.getContext "2d"
+			
+			n_cells = qrcode.getModuleCount()
+			cell_size = size / n_cells
+			
+			# draw in the canvas
+			for row in [0...n_cells]
+				for col in [0...n_cells]
+					ctx.fillStyle = if qrcode.isDark(row, col) then "#000" else "#fff"
+					w = (Math.ceil((col+1)*cell_size) - Math.floor(col*cell_size))
+					h = (Math.ceil((row+1)*cell_size) - Math.floor(row*cell_size))
+					ctx.fillRect(Math.round(col*cell_size), Math.round(row*cell_size), w, h)
+			
+			$(canvas)
+				.addClass "qr-code-popup"
+				.appendTo "body"
+				.css
+					position: "absolute"
+					margin: "auto"
+					top: 0, left: 0, bottom: 0, right: 0
+					zIndex: 10
+					boxShadow: "#0083F5 0 0 180px"
+					border: "5px solid rgba(0, 131, 245, 0.6)"

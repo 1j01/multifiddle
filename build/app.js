@@ -103,7 +103,7 @@
   $(function() {
     var project;
     project = new Project(fb_project, what_to_show);
-    return $G.on("hashchange", function() {
+    $G.on("hashchange", function() {
       var new_hash, new_project_id, new_to_show, ref2;
       new_hash = G.location.hash.replace('#', '');
       ref2 = new_hash.split("/"), new_project_id = ref2[0], new_to_show = ref2[1];
@@ -131,6 +131,50 @@
           }
         }
         return project.show(new_to_show);
+      }
+    });
+    return $G.on("keydown", function(e) {
+      var canvas, cell_size, col, ctrl_m, ctx, escape, h, i, j, n_cells, output_only_url, qrcode, ref2, ref3, row, size, w;
+      ctrl_m = e.ctrlKey && e.keyCode === 77;
+      escape = e.keyCode === 27;
+      if (escape || ctrl_m) {
+        if ($(".qr-code-popup").length) {
+          $(".qr-code-popup").remove();
+          return e.preventDefault();
+        }
+      }
+      if (ctrl_m) {
+        e.preventDefault();
+        output_only_url = location.origin.match(/127\.0\.0\.1|localhost|^file:/) ? "http://1j01.github.io/multifiddle/#" + project_id + "/output" : "" + location.origin + location.pathname + "#" + project_id + "/output";
+        size = 256;
+        qrcode = new QRCode(-1, QRErrorCorrectLevel.M);
+        qrcode.addData(output_only_url);
+        qrcode.make();
+        canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        ctx = canvas.getContext("2d");
+        n_cells = qrcode.getModuleCount();
+        cell_size = size / n_cells;
+        for (row = i = 0, ref2 = n_cells; 0 <= ref2 ? i < ref2 : i > ref2; row = 0 <= ref2 ? ++i : --i) {
+          for (col = j = 0, ref3 = n_cells; 0 <= ref3 ? j < ref3 : j > ref3; col = 0 <= ref3 ? ++j : --j) {
+            ctx.fillStyle = qrcode.isDark(row, col) ? "#000" : "#fff";
+            w = Math.ceil((col + 1) * cell_size) - Math.floor(col * cell_size);
+            h = Math.ceil((row + 1) * cell_size) - Math.floor(row * cell_size);
+            ctx.fillRect(Math.round(col * cell_size), Math.round(row * cell_size), w, h);
+          }
+        }
+        return $(canvas).addClass("qr-code-popup").appendTo("body").css({
+          position: "absolute",
+          margin: "auto",
+          top: 0,
+          left: 0,
+          bottom: 0,
+          right: 0,
+          zIndex: 10,
+          boxShadow: "#0083F5 0 0 180px",
+          border: "5px solid rgba(0, 131, 245, 0.6)"
+        });
       }
     });
   });
