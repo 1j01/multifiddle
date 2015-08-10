@@ -3,7 +3,7 @@ $G = $(G = window)
 
 E = (tagname)-> document.createElement tagname
 
-hell = (o_o)-> o_o # i.e. hell yes = yes, hell no = no
+hell = (b)-> b # boolean intensifier
 
 class @Pane
 	constructor: ->
@@ -142,10 +142,10 @@ class @PanesPane extends Pane
 		for child_pane in @children
 			child_pane.destroy?()
 
-class @PreviewPane extends Pane
+class @OutputPane extends Pane
 	constructor: ({project})->
 		super()
-		@$.addClass "preview-pane"
+		@$.addClass "output-pane leaf-pane"
 		$pane = @$
 		@_codes_previous = {}
 		@_coffee_body = ""
@@ -247,7 +247,7 @@ class @EditorPane extends Pane
 	constructor: ({lang, project})->
 		EditorPane.instances.push @
 		super()
-		@$.addClass "editor-pane"
+		@$.addClass "editor-pane leaf-pane"
 		$pane = @$
 		
 		trigger_code_change = ->

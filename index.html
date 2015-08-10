@@ -7,11 +7,13 @@
 	html,body,.firepad,.ace_editor,.pane,iframe{width:100%;height:100%;padding:0;margin:0;border:0;overflow:hidden}
 	iframe{overflow:auto}
 	/*.pane{overflow:visible} this breaks the layout and makes it look all pretty*/
-	.editor-pane,.preview-pane{box-shadow:0 0 1px rgba(255,255,255,0.5)}
+	.leaf-pane{box-shadow:0 0 1px rgba(255,255,255,0.5)}
 	.dragging iframe{pointer-events:none}
 	.col-resizing *{cursor:col-resize !important}
 	.row-resizing *{cursor:row-resize !important}
 	.multi-resizing *{cursor:move !important}
+	.show-output-only .output-pane{position:absolute;left:0;top:0;right:0;bottom:0;width:auto!important;height:auto!important}
+	.show-output-only .leaf-pane:not(.output-pane){visibility:hidden}
 	::-webkit-scrollbar{width:5px;height:5px;background:#000}
 	::-webkit-scrollbar-thumb{background:#555}
 	::-webkit-scrollbar-thumb:hover{background:#777}

@@ -10,8 +10,8 @@
     return document.createElement(tagname);
   };
 
-  hell = function(o_o) {
-    return o_o;
+  hell = function(b) {
+    return b;
   };
 
   this.Pane = (function() {
@@ -220,14 +220,14 @@
 
   })(Pane);
 
-  this.PreviewPane = (function(superClass) {
-    extend(PreviewPane, superClass);
+  this.OutputPane = (function(superClass) {
+    extend(OutputPane, superClass);
 
-    function PreviewPane(arg) {
+    function OutputPane(arg) {
       var $iframe, $pane, iframe, project;
       project = arg.project;
-      PreviewPane.__super__.constructor.call(this);
-      this.$.addClass("preview-pane");
+      OutputPane.__super__.constructor.call(this);
+      this.$.addClass("output-pane leaf-pane");
       $pane = this.$;
       this._codes_previous = {};
       this._coffee_body = "";
@@ -312,7 +312,7 @@
       })(this));
     }
 
-    return PreviewPane;
+    return OutputPane;
 
   })(Pane);
 
@@ -326,7 +326,7 @@
       lang = arg.lang, project = arg.project;
       EditorPane.instances.push(this);
       EditorPane.__super__.constructor.call(this);
-      this.$.addClass("editor-pane");
+      this.$.addClass("editor-pane leaf-pane");
       $pane = this.$;
       trigger_code_change = function() {
         project.codes[lang] = editor.getValue();

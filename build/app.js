@@ -12,13 +12,41 @@
 
   this.Project = (function() {
     function Project(fb, what_to_show) {
+      var bottom_pane, top_pane;
       this.fb = fb;
       this.languages = ["coffee", "css", "html"];
       this.$codes = $(this.codes = {});
+      this.root_pane = new PanesPane({
+        orientation: "y"
+      });
+      this.root_pane.add(top_pane = new PanesPane({
+        orientation: "x"
+      }));
+      this.root_pane.add(bottom_pane = new PanesPane({
+        orientation: "x"
+      }));
+      top_pane.add(new EditorPane({
+        project: this,
+        lang: this.languages[0]
+      }));
+      top_pane.add(new EditorPane({
+        project: this,
+        lang: this.languages[1]
+      }));
+      bottom_pane.add(new EditorPane({
+        project: this,
+        lang: this.languages[2]
+      }));
+      bottom_pane.add(this.output_pane = new OutputPane({
+        project: this
+      }));
+      this.root_pane.$.appendTo("body");
+      this.root_pane.layout();
+      this.applyTheme("tomorrow_night_bright");
       this.show(what_to_show);
       $G.on("resize", this._onresize = (function(_this) {
         return function() {
-          return _this.main_pane.layout();
+          return _this.root_pane.layout();
         };
       })(this));
     }
@@ -42,62 +70,17 @@
 
     Project.prototype.exit = function() {
       $G.off("resize", this._onresize);
-      this.main_pane.destroy();
-      return this.main_pane.$.remove();
+      this.root_pane.destroy();
+      return this.root_pane.$.remove();
     };
 
     Project.prototype.show = function(what_to_show) {
-      var bottom_pane, ref1, ref2, ref3, top_pane;
-      what_to_show || (what_to_show = "all");
-      if ((ref1 = this.main_pane) != null) {
-        ref1.destroy();
-      }
-      if ((ref2 = this.main_pane) != null) {
-        if ((ref3 = ref2.$) != null) {
-          ref3.remove();
-        }
-      }
       switch (what_to_show) {
         case "output":
-          this.main_pane = new PanesPane({
-            orientation: "y"
-          });
-          this.main_pane.add(new PreviewPane({
-            project: this
-          }));
-          break;
-        case "all":
-          this.main_pane = new PanesPane({
-            orientation: "y"
-          });
-          this.main_pane.add(top_pane = new PanesPane({
-            orientation: "x"
-          }));
-          this.main_pane.add(bottom_pane = new PanesPane({
-            orientation: "x"
-          }));
-          top_pane.add(new EditorPane({
-            project: this,
-            lang: this.languages[0]
-          }));
-          top_pane.add(new EditorPane({
-            project: this,
-            lang: this.languages[1]
-          }));
-          bottom_pane.add(new EditorPane({
-            project: this,
-            lang: this.languages[2]
-          }));
-          bottom_pane.add(new PreviewPane({
-            project: this
-          }));
-          break;
+          return $("body").addClass("show-output-only");
         default:
-          alert("Unknown thing to show, url includes #.../???");
+          return $("body").removeClass("show-output-only");
       }
-      this.main_pane.$.appendTo("body");
-      this.main_pane.layout();
-      return this.applyTheme("tomorrow_night_bright");
     };
 
     return Project;

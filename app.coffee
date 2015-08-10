@@ -13,19 +13,20 @@ class @Project
 		@languages = ["coffee", "css", "html"]
 		@$codes = $(@codes = {})
 		
-		@show what_to_show
-		# @main_pane = new PanesPane orientation: "y"
-		# @main_pane.add top_pane = new PanesPane orientation: "x"
-		# @main_pane.add bottom_pane = new PanesPane orientation: "x"
-		# top_pane.add new EditorPane project: @, lang: @languages[0]
-		# top_pane.add new EditorPane project: @, lang: @languages[1]
-		# bottom_pane.add new EditorPane project: @, lang: @languages[2]
-		# bottom_pane.add @output_pane = new PreviewPane project: @
-		# 
-		# $body.append @main_pane.$
-		# @main_pane.layout()
+		@root_pane = new PanesPane orientation: "y"
+		@root_pane.add top_pane = new PanesPane orientation: "x"
+		@root_pane.add bottom_pane = new PanesPane orientation: "x"
+		top_pane.add new EditorPane project: @, lang: @languages[0]
+		top_pane.add new EditorPane project: @, lang: @languages[1]
+		bottom_pane.add new EditorPane project: @, lang: @languages[2]
+		bottom_pane.add @output_pane = new OutputPane project: @
 		
-		$G.on "resize", @_onresize = => @main_pane.layout()
+		@root_pane.$.appendTo "body"
+		@root_pane.layout()
+		@applyTheme "tomorrow_night_bright"
+		@show what_to_show
+		
+		$G.on "resize", @_onresize = => @root_pane.layout()
 	
 	applyTheme: (theme_name)->
 		theme = themesByName[theme_name]
@@ -40,30 +41,15 @@ class @Project
 	
 	exit: ->
 		$G.off "resize", @_onresize
-		@main_pane.destroy()
-		@main_pane.$.remove()
+		@root_pane.destroy()
+		@root_pane.$.remove()
 	
 	show: (what_to_show)->
-		what_to_show or= "all"
-		@main_pane?.destroy()
-		@main_pane?.$?.remove()
 		switch what_to_show
 			when "output"
-				@main_pane = new PanesPane orientation: "y"
-				@main_pane.add new PreviewPane project: @
-			when "all"
-				@main_pane = new PanesPane orientation: "y"
-				@main_pane.add top_pane = new PanesPane orientation: "x"
-				@main_pane.add bottom_pane = new PanesPane orientation: "x"
-				top_pane.add new EditorPane project: @, lang: @languages[0]
-				top_pane.add new EditorPane project: @, lang: @languages[1]
-				bottom_pane.add new EditorPane project: @, lang: @languages[2]
-				bottom_pane.add new PreviewPane project: @
+				$("body").addClass "show-output-only"
 			else
-				alert "Unknown thing to show, url includes #.../???"
-		@main_pane.$.appendTo "body"
-		@main_pane.layout()
-		@applyTheme "tomorrow_night_bright"
+				$("body").removeClass "show-output-only"
 
 
 fb_root = new Firebase "https://multifiddle.firebaseio.com/"
