@@ -109,7 +109,7 @@
       ref2 = new_hash.split("/"), new_project_id = ref2[0], new_to_show = ref2[1];
       if (typeof console !== "undefined" && console !== null) {
         if (typeof console.debug === "function") {
-          console.debug("location hash changed from", hash, "to", new_hash);
+          console.debug("location hash changed from " + hash + " to " + new_hash);
         }
       }
       if (new_project_id !== project_id) {

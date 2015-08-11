@@ -224,9 +224,11 @@
     extend(OutputPane, superClass);
 
     function OutputPane(arg) {
-      var $iframe, $pane, iframe, project;
+      var $iframe, $pane, disable_output, disable_output_key, iframe, project;
       project = arg.project;
       OutputPane.__super__.constructor.call(this);
+      disable_output_key = "prevent running " + (project.fb.name());
+      disable_output = localStorage[disable_output_key];
       this.$.addClass("output-pane leaf-pane");
       $pane = this.$;
       this._codes_previous = {};
@@ -237,7 +239,7 @@
       $iframe.appendTo($pane);
       project.$codes.on("change", (function(_this) {
         return function(e, lang) {
-          var all_languages_are_there, body, codes, data_uri, error_handling, expected_lang, head, html, j, js, len, ref;
+          var $disabled_output, all_languages_are_there, body, codes, error_handling, expected_lang, head, html, j, js, len, ref, run;
           codes = project.codes;
           all_languages_are_there = true;
           ref = project.languages;
@@ -288,26 +290,78 @@
             body += _this._coffee_body;
           }
           html = "<!doctype html>\n<html>\n	<head>\n		<meta charset=\"utf-8\">\n		<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n		" + head + "\n	</head>\n	<body style='background:black;color:white;'>\n		" + body + "\n	</body>\n</html>";
-          $iframe.one("load", function() {
-            return $pane.loading("done");
-          });
-          if (typeof $iframe[0].srcdoc === "string") {
-            $iframe.attr({
-              srcdoc: html
+          run = function() {
+            var data_uri;
+            localStorage[disable_output_key] = true;
+            $pane.find(".disabled-output").remove();
+            $iframe.show();
+            $(window).on("beforeunload", function() {
+              delete localStorage[disable_output_key];
             });
-          } else {
-            data_uri = "data:text/html," + (encodeURI(html));
-            if (iframe.contentWindow) {
-              iframe.contentWindow.location.replace(data_uri);
-            } else {
+            $iframe.on("load", function() {
+              $pane.loading("done");
+              return setTimeout(function() {
+                return delete localStorage[disable_output_key];
+              }, 500);
+            });
+            if (typeof $iframe[0].srcdoc === "string") {
               $iframe.attr({
-                src: data_uri
+                srcdoc: html
               });
+            } else {
+              data_uri = "data:text/html," + (encodeURI(html));
+              if (iframe.contentWindow) {
+                iframe.contentWindow.location.replace(data_uri);
+              } else {
+                $iframe.attr({
+                  src: data_uri
+                });
+              }
             }
+            return $.each(codes, function(lang, code) {
+              return _this._codes_previous[lang] = code;
+            });
+          };
+          $pane.find(".disabled-output").remove();
+          if (disable_output) {
+            $pane.loading("done");
+            $iframe.hide();
+            $disabled_output = $("<div>").addClass("disabled-output").css({
+              position: "relative",
+              height: "100%",
+              backgroundColor: "rgb(25, 25, 25)",
+              backgroundImage: "linear-gradient(-45deg, black 25%, transparent 25%, transparent 50%, black 50%, black 75%, transparent 75%, transparent)",
+              backgroundSize: "4px 4px"
+            }).append($("<button>").click(run).css({
+              margin: "auto",
+              position: "absolute",
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: 100,
+              height: 100,
+              padding: 0,
+              background: "transparent",
+              border: 0,
+              outline: 0
+            }).append($('<svg height="48" viewBox="0 0 48 48" width="48" xmlns="http://www.w3.org/2000/svg"> <defs xmlns="http://www.w3.org/2000/svg"> <filter id="drop-shadow" height="130%"> <feOffset dx="0" dy="2" in="SourceAlpha"/> <feMerge> <feMergeNode/> <feMergeNode in="SourceGraphic"/> </feMerge> </filter> <filter id="recessed" height="130%"> <feOffset dx="0" dy="2" in="SourceGraphic"/> </filter> </defs> <path d="M20 33l12-9-12-9v18zm4-29C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16z"/> <style> button path { fill: #332F28; /*#C2E3FF;*/ filter: url(#drop-shadow); } button:hover path { fill: #90661B; /*white;*/ } button:active path { fill: #B9872F; filter: url(#recessed); } </style> </svg>').css({
+              width: 100,
+              height: 100
+            })), $("<p>").text("This might crash...").css({
+              position: "absolute",
+              bottom: 0,
+              width: "100%",
+              textAlign: "center",
+              margin: "15px 0",
+              color: "rgb(50, 46, 38)",
+              fontWeight: "bold",
+              textShadow: "0 1px 1px #000, 0 0 2px #000, 0 0 20px #000"
+            }));
+            return $pane.append($disabled_output);
+          } else {
+            return run();
           }
-          return $.each(codes, function(lang, code) {
-            return _this._codes_previous[lang] = code;
-          });
         };
       })(this));
     }

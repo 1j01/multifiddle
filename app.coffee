@@ -48,7 +48,10 @@ class @Project
 		switch what_to_show
 			when "output"
 				$("body").addClass "show-output-only"
+			# when "no-output", "crash", "crashy", "crashed", "infinite-loop", "help", "help-me", "stop"
+			# 	$("body").addClass "do-not-run-output"
 			else
+				# $("body").removeClass "show-output-only do-not-run-output"
 				$("body").removeClass "show-output-only"
 
 
@@ -69,7 +72,7 @@ $ ->
 	$G.on "hashchange", ->
 		new_hash = G.location.hash.replace '#', ''
 		[new_project_id, new_to_show] = new_hash.split "/"
-		console?.debug? "location hash changed from", hash, "to", new_hash
+		console?.debug? "location hash changed from #{hash} to #{new_hash}"
 		
 		if new_project_id isnt project_id
 			project_id = new_project_id

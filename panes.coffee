@@ -145,6 +145,10 @@ class @PanesPane extends Pane
 class @OutputPane extends Pane
 	constructor: ({project})->
 		super()
+		
+		disable_output_key = "prevent running #{project.fb.name()}"
+		disable_output = localStorage[disable_output_key]
+		
 		@$.addClass "output-pane leaf-pane"
 		$pane = @$
 		@_codes_previous = {}
@@ -226,22 +230,115 @@ class @OutputPane extends Pane
 					</body>
 				</html>
 			"""
-			$iframe.one "load", -> $pane.loading "done"
 			
-			# if browser supports srcdoc
-			if typeof $iframe[0].srcdoc is "string"
-				$iframe.attr srcdoc: html
-			else
-				# NOTE: data URIs are limited to ~32k characters
-				data_uri = "data:text/html,#{encodeURI html}"
-				
-				if iframe.contentWindow
-					iframe.contentWindow.location.replace data_uri
+			run = =>
+				localStorage[disable_output_key] = on
+				$pane.find(".disabled-output").remove()
+				$iframe.show()
+				$(window).on "beforeunload", ->
+					delete localStorage[disable_output_key]
+					return
+				$iframe.on "load", ->
+					$pane.loading "done"
+					setTimeout ->
+						# if after 500ms it hasn't crashed, that's good
+						delete localStorage[disable_output_key]
+					, 500
+				# if browser supports srcdoc
+				if typeof $iframe[0].srcdoc is "string"
+					$iframe.attr srcdoc: html
 				else
-					$iframe.attr src: data_uri
+					# NOTE: data URIs are limited to ~32k characters
+					data_uri = "data:text/html,#{encodeURI html}"
+					
+					if iframe.contentWindow
+						iframe.contentWindow.location.replace data_uri
+					else
+						$iframe.attr src: data_uri
+				
+				$.each codes, (lang, code)=>
+					@_codes_previous[lang] = code
 			
-			$.each codes, (lang, code)=>
-				@_codes_previous[lang] = code
+			# console.log all_languages_are_there, codes
+			$pane.find(".disabled-output").remove()
+			if disable_output
+				$pane.loading "done"
+				$iframe.hide()
+				$disabled_output = $("<div>")
+					.addClass "disabled-output"
+					.css
+						position: "relative"
+						height: "100%"
+						backgroundColor: "rgb(25, 25, 25)" # "#27160F"
+						backgroundImage: "linear-gradient(-45deg, black 25%, transparent 25%, transparent 50%, black 50%, black 75%, transparent 75%, transparent)"
+						backgroundSize: "4px 4px"
+					.append(
+						# $("<button>Run</button>")
+						$("<button>")
+							.click run
+							.css
+								margin: "auto"
+								position: "absolute"
+								left: 0
+								right: 0
+								top: 0
+								bottom: 0
+								width: 100
+								height: 100
+								padding: 0
+								background: "transparent"
+								border: 0
+								outline: 0
+							.append(
+								$('
+									<svg height="48" viewBox="0 0 48 48" width="48" xmlns="http://www.w3.org/2000/svg">
+										<defs xmlns="http://www.w3.org/2000/svg">
+											<filter id="drop-shadow" height="130%">
+												<feOffset dx="0" dy="2" in="SourceAlpha"/>
+												<feMerge> 
+													<feMergeNode/>
+													<feMergeNode in="SourceGraphic"/> 
+												</feMerge>
+											</filter>
+											<filter id="recessed" height="130%">
+												<feOffset dx="0" dy="2" in="SourceGraphic"/>
+											</filter>
+										</defs>
+										<path d="M20 33l12-9-12-9v18zm4-29C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16z"/>
+										<style>
+											button path {
+												fill: #332F28; /*#C2E3FF;*/
+												filter: url(#drop-shadow);
+											}
+											button:hover path {
+												fill: #90661B; /*white;*/
+											}
+											button:active path {
+												fill: #B9872F;
+												filter: url(#recessed);
+											}
+										</style>
+									</svg>
+								')
+									.css
+										width: 100
+										height: 100
+							)
+						$("<p>")
+							.text "This might crash..."
+							.css
+								position: "absolute"
+								bottom: 0
+								width: "100%"
+								textAlign: "center"
+								margin: "15px 0"
+								color: "rgb(50, 46, 38)" # "#656565"
+								fontWeight: "bold"
+								textShadow: "0 1px 1px #000, 0 0 2px #000, 0 0 20px #000"
+					)
+				$pane.append $disabled_output
+			else
+				run()
 
 class @EditorPane extends Pane
 	@instances = []
