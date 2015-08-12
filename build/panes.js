@@ -234,7 +234,8 @@
       this._codes_previous = {};
       this._coffee_body = "";
       $iframe = $(iframe = E('iframe')).attr({
-        sandbox: "allow-same-origin allow-scripts allow-forms"
+        sandbox: "allow-same-origin allow-scripts allow-forms",
+        allowfullscreen: true
       });
       $iframe.appendTo($pane);
       wait_then = function(fn) {

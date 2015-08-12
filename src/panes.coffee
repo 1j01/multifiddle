@@ -153,7 +153,7 @@ class @OutputPane extends Pane
 		@_codes_previous = {}
 		@_coffee_body = ""
 		
-		$iframe = $(iframe = E 'iframe').attr(sandbox: "allow-same-origin allow-scripts allow-forms")
+		$iframe = $(iframe = E 'iframe').attr(sandbox: "allow-same-origin allow-scripts allow-forms", allowfullscreen: yes)
 		$iframe.appendTo $pane
 		wait_then = (fn)->
 			tid = -1
