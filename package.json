@@ -1,6 +1,6 @@
 {
   "name": "multifiddle",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "author": "Isaiah Odhner",
   "description": "Minimalistic multilingual collaborative code-fiddling",
   "scripts": {
@@ -17,12 +17,16 @@
   "keywords": [
     "multi",
     "fiddle",
+    "fiddling",
+    "code-fiddle",
+    "code-fiddling",
     "collaborative",
     "app",
     "coding",
     "code",
     "programming",
     "dev",
+    "development",
     "prototyping",
     "hacking"
   ],
