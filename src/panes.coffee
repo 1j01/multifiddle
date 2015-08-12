@@ -158,7 +158,6 @@ class @OutputPane extends Pane
 		wait_then = (fn)->
 			tid = -1
 			(args...)->
-				console.log "clearTimeout #{tid}"
 				clearTimeout tid
 				tid = setTimeout ->
 					fn args...
@@ -171,7 +170,6 @@ class @OutputPane extends Pane
 				if not codes[expected_lang]?
 					all_languages_are_there = false
 			
-			console.log all_languages_are_there, codes
 			return unless all_languages_are_there
 			
 			$pane.loading()
@@ -273,30 +271,11 @@ class @OutputPane extends Pane
 				$iframe.hide()
 				$disabled_output = $("<div>")
 					.addClass "disabled-output"
-					.css
-						position: "relative"
-						height: "100%"
-						backgroundColor: "rgb(25, 25, 25)" # "#27160F"
-						backgroundImage: "linear-gradient(-45deg, black 25%, transparent 25%, transparent 50%, black 50%, black 75%, transparent 75%, transparent)"
-						backgroundSize: "4px 4px"
 					.append(
 						$("<button>")
 							.click run
-							.css
-								margin: "auto"
-								position: "absolute"
-								left: 0
-								right: 0
-								top: 0
-								bottom: 0
-								width: 100
-								height: 100
-								padding: 0
-								background: "transparent"
-								border: 0
-								outline: 0
 							.append(
-								$('
+								$('''
 									<svg height="48" viewBox="0 0 48 48" width="48" xmlns="http://www.w3.org/2000/svg">
 										<defs xmlns="http://www.w3.org/2000/svg">
 											<filter id="drop-shadow" height="130%">
@@ -311,36 +290,10 @@ class @OutputPane extends Pane
 											</filter>
 										</defs>
 										<path d="M20 33l12-9-12-9v18zm4-29C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16z"/>
-										<style>
-											button path {
-												fill: #332F28; /*#C2E3FF;*/
-												filter: url(#drop-shadow);
-											}
-											button:hover path {
-												fill: #90661B; /*white;*/
-											}
-											button:active path {
-												fill: #B9872F;
-												filter: url(#recessed);
-											}
-										</style>
 									</svg>
-								')
-									.css
-										width: 100
-										height: 100
+								''')
 							)
-						$("<p>")
-							.text "This might crash..."
-							.css
-								position: "absolute"
-								bottom: 0
-								width: "100%"
-								textAlign: "center"
-								margin: "15px 0"
-								color: "rgb(50, 46, 38)" # "#656565"
-								fontWeight: "bold"
-								textShadow: "0 1px 1px #000, 0 0 2px #000, 0 0 20px #000"
+						$("<p>This might crash...</p>")
 					)
 				$pane.append $disabled_output
 			else
@@ -354,14 +307,8 @@ class @EditorPane extends Pane
 		@$.addClass "editor-pane leaf-pane"
 		$pane = @$
 		
-		# debounce_time = -Infinity
 		trigger_code_change = ->
-			# console.log "trigger_code_change? #{lang}, #{Date.now() - debounce_time}", editor.getValue()
-			# # console.log 
-			# return if Date.now() < debounce_time + 100
-			# debounce_time = Date.now()
 			project.codes[lang] = editor.getValue()
-			console.log "trigger code change for #{lang}"
 			project.$codes.triggerHandler "change", lang
 		
 		$pad = $(E 'div')

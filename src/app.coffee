@@ -48,10 +48,7 @@ class @Project
 		switch what_to_show
 			when "output"
 				$("body").addClass "show-output-only"
-			# when "no-output", "crash", "crashy", "crashed", "infinite-loop", "help", "help-me", "stop"
-			# 	$("body").addClass "do-not-run-output"
 			else
-				# $("body").removeClass "show-output-only do-not-run-output"
 				$("body").removeClass "show-output-only"
 
 
@@ -120,7 +117,7 @@ $ ->
 			n_cells = qrcode.getModuleCount()
 			cell_size = size / n_cells
 			
-			# draw in the canvas
+			# draw on the canvas
 			for row in [0...n_cells]
 				for col in [0...n_cells]
 					ctx.fillStyle = if qrcode.isDark(row, col) then "#000" else "#fff"

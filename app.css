@@ -1,0 +1,103 @@
+html,
+body.dark {
+	background: #000;
+	color: #fff;
+	font-family: sans-serif;
+}
+html,
+body,
+.firepad,
+.ace_editor,
+.pane,
+iframe {
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	margin: 0;
+	border: 0;
+	overflow: hidden;
+}
+iframe {
+	overflow: auto;
+}
+
+/* .pane{overflow:visible} This breaks the layout and makes it look all pretty,
+because without this the box-shadow below doesn't display everywhere it should. */
+.leaf-pane {
+	box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
+}
+.dragging iframe {
+	pointer-events: none;
+}
+.col-resizing * { cursor: col-resize !important; }
+.row-resizing * { cursor: row-resize !important; }
+.multi-resizing * { cursor: move !important; }
+
+.show-output-only .output-pane {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: auto !important;
+	height: auto !important;
+}
+.show-output-only .leaf-pane:not(.output-pane) {
+	visibility: hidden;
+}
+
+::-webkit-scrollbar {
+	width: 5px;
+	height: 5px;
+	background: #000;
+}
+::-webkit-scrollbar-thumb {
+	background: #555;
+}
+::-webkit-scrollbar-thumb:hover {
+	background: #777;
+}
+
+.disabled-output {
+	position: relative;
+	height: 100%;
+	background-color: rgb(25, 25, 25);
+	background-image: linear-gradient(-45deg, black 25%, transparent 25%, transparent 50%, black 50%, black 75%, transparent 75%, transparent);
+	background-size: 4px 4px;
+}
+.disabled-output p {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	text-align: center;
+	margin: 15px 0;
+	color: rgb(50, 46, 38);
+	font-weight: bold;
+	text-shadow: 0 1px 1px #000, 0 0 2px #000, 0 0 20px #000;
+}
+.disabled-output > button {
+	margin: auto;
+	position: absolute;
+	left: 0; right: 0; top: 0; bottom: 0;
+	width: 100px;
+	height: 100px;
+	background: transparent;
+	padding: 0;
+	border: 0;
+	outline: 0;
+}
+.disabled-output > button svg {
+	width: 100px;
+	height: 100px;
+}
+.disabled-output > button path {
+	fill: #332F28;
+	filter: url(#drop-shadow);
+}
+.disabled-output > button:hover path {
+	fill: #90661B;
+}
+.disabled-output > button:active path {
+	fill: #B9872F;
+	filter: url(#recessed);
+}
