@@ -25,7 +25,7 @@ class @PanesPane extends Pane
 		@orientation = orientation or "y"
 		@children = []
 		@$resizers = $()
-		
+	
 	orient: (orientation)->
 		@orientation = orientation
 		@layout()
@@ -147,16 +147,23 @@ class @OutputPane extends Pane
 		super()
 		
 		disable_output_key = "prevent running #{project.fb.name()}"
-		disable_output = localStorage[disable_output_key]
 		
 		@$.addClass "output-pane leaf-pane"
 		$pane = @$
 		@_codes_previous = {}
 		@_coffee_body = ""
 		
-		$iframe = $(iframe = E 'iframe').attr(sandbox:"allow-same-origin allow-scripts allow-forms")
+		$iframe = $(iframe = E 'iframe').attr(sandbox: "allow-same-origin allow-scripts allow-forms")
 		$iframe.appendTo $pane
-		project.$codes.on "change", (e, lang)=>
+		wait_then = (fn)->
+			tid = -1
+			(args...)->
+				console.log "clearTimeout #{tid}"
+				clearTimeout tid
+				tid = setTimeout ->
+					fn args...
+				, 600
+		project.$codes.on "change", wait_then =>
 			{codes} = project
 			
 			all_languages_are_there = true
@@ -164,6 +171,7 @@ class @OutputPane extends Pane
 				if not codes[expected_lang]?
 					all_languages_are_there = false
 			
+			console.log all_languages_are_there, codes
 			return unless all_languages_are_there
 			
 			$pane.loading()
@@ -259,9 +267,8 @@ class @OutputPane extends Pane
 				$.each codes, (lang, code)=>
 					@_codes_previous[lang] = code
 			
-			# console.log all_languages_are_there, codes
 			$pane.find(".disabled-output").remove()
-			if disable_output
+			if localStorage[disable_output_key]
 				$pane.loading "done"
 				$iframe.hide()
 				$disabled_output = $("<div>")
@@ -273,7 +280,6 @@ class @OutputPane extends Pane
 						backgroundImage: "linear-gradient(-45deg, black 25%, transparent 25%, transparent 50%, black 50%, black 75%, transparent 75%, transparent)"
 						backgroundSize: "4px 4px"
 					.append(
-						# $("<button>Run</button>")
 						$("<button>")
 							.click run
 							.css
@@ -295,9 +301,9 @@ class @OutputPane extends Pane
 										<defs xmlns="http://www.w3.org/2000/svg">
 											<filter id="drop-shadow" height="130%">
 												<feOffset dx="0" dy="2" in="SourceAlpha"/>
-												<feMerge> 
+												<feMerge>
 													<feMergeNode/>
-													<feMergeNode in="SourceGraphic"/> 
+													<feMergeNode in="SourceGraphic"/>
 												</feMerge>
 											</filter>
 											<filter id="recessed" height="130%">
@@ -348,8 +354,14 @@ class @EditorPane extends Pane
 		@$.addClass "editor-pane leaf-pane"
 		$pane = @$
 		
+		# debounce_time = -Infinity
 		trigger_code_change = ->
+			# console.log "trigger_code_change? #{lang}, #{Date.now() - debounce_time}", editor.getValue()
+			# # console.log 
+			# return if Date.now() < debounce_time + 100
+			# debounce_time = Date.now()
 			project.codes[lang] = editor.getValue()
+			console.log "trigger code change for #{lang}"
 			project.$codes.triggerHandler "change", lang
 		
 		$pad = $(E 'div')

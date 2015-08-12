@@ -2,7 +2,8 @@
 (function() {
   var $G, E, G, hell,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
+    hasProp = {}.hasOwnProperty,
+    slice = [].slice;
 
   $G = $(G = window);
 
@@ -224,11 +225,10 @@
     extend(OutputPane, superClass);
 
     function OutputPane(arg) {
-      var $iframe, $pane, disable_output, disable_output_key, iframe, project;
+      var $iframe, $pane, disable_output_key, iframe, project, wait_then;
       project = arg.project;
       OutputPane.__super__.constructor.call(this);
       disable_output_key = "prevent running " + (project.fb.name());
-      disable_output = localStorage[disable_output_key];
       this.$.addClass("output-pane leaf-pane");
       $pane = this.$;
       this._codes_previous = {};
@@ -237,9 +237,22 @@
         sandbox: "allow-same-origin allow-scripts allow-forms"
       });
       $iframe.appendTo($pane);
-      project.$codes.on("change", (function(_this) {
-        return function(e, lang) {
-          var $disabled_output, all_languages_are_there, body, codes, error_handling, expected_lang, head, html, j, js, len, ref, run;
+      wait_then = function(fn) {
+        var tid;
+        tid = -1;
+        return function() {
+          var args;
+          args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+          console.log("clearTimeout " + tid);
+          clearTimeout(tid);
+          return tid = setTimeout(function() {
+            return fn.apply(null, args);
+          }, 600);
+        };
+      };
+      project.$codes.on("change", wait_then((function(_this) {
+        return function() {
+          var $disabled_output, all_languages_are_there, body, codes, e, error_handling, expected_lang, head, html, j, js, len, ref, run;
           codes = project.codes;
           all_languages_are_there = true;
           ref = project.languages;
@@ -249,6 +262,7 @@
               all_languages_are_there = false;
             }
           }
+          console.log(all_languages_are_there, codes);
           if (!all_languages_are_there) {
             return;
           }
@@ -323,7 +337,7 @@
             });
           };
           $pane.find(".disabled-output").remove();
-          if (disable_output) {
+          if (localStorage[disable_output_key]) {
             $pane.loading("done");
             $iframe.hide();
             $disabled_output = $("<div>").addClass("disabled-output").css({
@@ -363,7 +377,7 @@
             return run();
           }
         };
-      })(this));
+      })(this)));
     }
 
     return OutputPane;
@@ -384,6 +398,7 @@
       $pane = this.$;
       trigger_code_change = function() {
         project.codes[lang] = editor.getValue();
+        console.log("trigger code change for " + lang);
         return project.$codes.triggerHandler("change", lang);
       };
       $pad = $(E('div'));
