@@ -146,7 +146,7 @@ class @OutputPane extends Pane
 	constructor: ({project})->
 		super()
 		
-		disable_output_key = "prevent running #{project.fb.name()}"
+		disable_output_key = "prevent running #{project.fb.key()}"
 		
 		@$.addClass "output-pane leaf-pane"
 		$pane = @$
@@ -327,6 +327,7 @@ class @EditorPane extends Pane
 		editor.setShowPrintMargin no
 		editor.setReadOnly yes
 		editor.setSelectionStyle "text" # because this is what your selection will look like to other people
+		editor.$blockScrolling = Infinity # I don't know if I actually want this
 		session.setUseWrapMode no
 		session.setUseWorker (lang isnt "html") # html linter recommends full html (<!doctype> etc.)
 		session.setUseSoftTabs hell no

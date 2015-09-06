@@ -228,7 +228,7 @@
       var $iframe, $pane, disable_output_key, iframe, project, wait_then;
       project = arg.project;
       OutputPane.__super__.constructor.call(this);
-      disable_output_key = "prevent running " + (project.fb.name());
+      disable_output_key = "prevent running " + (project.fb.key());
       this.$.addClass("output-pane leaf-pane");
       $pane = this.$;
       this._codes_previous = {};
@@ -378,6 +378,7 @@
       editor.setShowPrintMargin(false);
       editor.setReadOnly(true);
       editor.setSelectionStyle("text");
+      editor.$blockScrolling = Infinity;
       session.setUseWrapMode(false);
       session.setUseWorker(lang !== "html");
       session.setUseSoftTabs(hell(false));

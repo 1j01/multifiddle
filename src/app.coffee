@@ -61,7 +61,7 @@ if hash
 	fb_project = fb_root.child project_id
 else
 	fb_project = fb_root.push()
-	G.location = G.location + '#' + fb_project.name()
+	G.location = G.location + '#' + fb_project.key()
 
 $ ->
 	project = new Project fb_project, what_to_show

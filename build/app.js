@@ -97,7 +97,7 @@
     fb_project = fb_root.child(project_id);
   } else {
     fb_project = fb_root.push();
-    G.location = G.location + '#' + fb_project.name();
+    G.location = G.location + '#' + fb_project.key();
   }
 
   $(function() {
