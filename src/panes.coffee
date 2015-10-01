@@ -334,15 +334,15 @@ class @EditorPane extends Pane
 		session.setMode "ace/mode/#{lang}"
 		
 		# Create Firepad
-		firepad = Firepad.fromACE fb_fp, editor
+		@firepad = Firepad.fromACE fb_fp, editor
 		
 		# Initialize contents
-		firepad.on 'ready', ->
+		@firepad.on 'ready', =>
 			trigger_code_change()
 			$pane.loading "done"
 			editor.setReadOnly no
-			if firepad.isHistoryEmpty()
-				firepad.setText (
+			if @firepad.isHistoryEmpty()
+				@firepad.setText (
 					javascript: '''
 						// JavaScript
 						
@@ -380,5 +380,6 @@ class @EditorPane extends Pane
 		@editor.resize()
 	
 	destroy: ->
+		@firepad.dispose()
 		@editor.destroy()
 		EditorPane.instances = (instance for instance in EditorPane.instances when instance isnt @)
