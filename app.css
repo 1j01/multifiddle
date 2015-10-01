@@ -1,5 +1,5 @@
 html,
-body.dark {
+body {
 	background: #000;
 	color: #fff;
 	font-family: sans-serif;
@@ -24,12 +24,33 @@ iframe {
 	pointer-events: none;
 }
 
-/* .pane{overflow:visible} This breaks the layout and makes it look all pretty,
-because without this the box-shadow below doesn't display everywhere it should. */
-.leaf-pane {
-	box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
-	position: relative; /* for .label positioning */
+body {
+	position: absolute;
+	left: -1px;
+	top: -1px;
+	right: -1px;
+	bottom: -1px;
+	width: auto;
+	height: auto;
 }
+
+.leaf-pane {
+	border-radius: 2px;
+	position: relative; /* for .label and .leaf-pane::after positioning */
+}
+.leaf-pane::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	z-index: 50;
+	border-radius: 2px;
+	box-shadow: 0 0 1px rgba(255, 255, 255, 0.5) inset;
+	pointer-events: none;
+}
+
 .col-resizing * { cursor: col-resize !important; }
 .row-resizing * { cursor: row-resize !important; }
 .multi-resizing * { cursor: move !important; }

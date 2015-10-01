@@ -35,7 +35,7 @@
 
     extend(PanesPane, superClass);
 
-    resizer_size = 10;
+    resizer_size = 8;
 
     function PanesPane(arg) {
       var orientation;
@@ -415,6 +415,7 @@
       editor.setReadOnly(true);
       editor.setSelectionStyle("text");
       editor.setOption("highlightActiveLine", false);
+      editor.setOption("highlightGutterLine", false);
       editor.$blockScrolling = Infinity;
       session.setUseWrapMode(false);
       session.setUseWorker(lang !== "html");

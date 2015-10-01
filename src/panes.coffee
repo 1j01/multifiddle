@@ -16,7 +16,7 @@ class @Pane
 	destroy: ->
 
 class @PanesPane extends Pane
-	resizer_size = 10
+	resizer_size = 8 # TODO: use CSS
 	
 	constructor: ({orientation})->
 		super
@@ -345,10 +345,12 @@ class @EditorPane extends LeafPane
 		editor.setShowPrintMargin no
 		editor.setReadOnly yes
 		editor.setSelectionStyle "text" # because this is what your selection will look like to other people
+		# TODO: toggle line highlight based on focusedness of the ace editor 
 		editor.setOption "highlightActiveLine", no
-		editor.$blockScrolling = Infinity # I don't know if I actually want this
+		editor.setOption "highlightGutterLine", no
+		editor.$blockScrolling = Infinity # I don't know if I actually want this, just hiding a warning
 		session.setUseWrapMode no
-		session.setUseWorker (lang isnt "html") # html linter recommends full html (<!doctype> etc.)
+		session.setUseWorker (lang isnt "html") # html linter recommends full html (<!doctype> etc.) which we don't want
 		session.setUseSoftTabs hell no
 		session.setMode "ace/mode/#{lang}"
 		
