@@ -314,7 +314,8 @@
               return d.innerText = d.textContent = error;
             };
           };
-          body += "<script>~" + error_handling + "()</script>\n<style>\n	.error {\n		color: red;\n	}\n	.error.bubble {\n		background: rgba(255, 0, 0, 0.8);\n		color: white;\n	}\n	body {\n		font-family: Helvetica, sans-serif;\n	}\n</style>";
+          body += "<script>~" + error_handling + "()</script>";
+          head += "<style>\n	.error {\n		color: red;\n	}\n	.error.bubble {\n		background: rgba(255, 0, 0, 0.8);\n		color: white;\n	}\n	body {\n		font-family: Helvetica, sans-serif;\n		background: black;\n		color: white;\n	}\n</style>";
           if (codes.html) {
             body += codes.html;
           }
@@ -338,7 +339,7 @@
             }
             body += _this._coffee_body;
           }
-          html = "<!doctype html>\n<html>\n	<head>\n		<meta charset=\"utf-8\">\n		<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n		" + head + "\n	</head>\n	<body style='background:black;color:white;'>\n		" + body + "\n	</body>\n</html>";
+          html = "<!doctype html>\n<html>\n	<head>\n		<meta charset=\"utf-8\">\n		<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n		" + head + "\n	</head>\n	<body>\n		" + body + "\n	</body>\n</html>";
           run = function() {
             var data_uri;
             localStorage[disable_output_key] = true;

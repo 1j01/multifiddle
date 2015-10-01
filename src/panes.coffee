@@ -207,6 +207,8 @@ class @OutputPane extends LeafPane
 			
 			body += """
 				<script>~#{error_handling}()</script>
+			"""
+			head += """
 				<style>
 					.error {
 						color: red;
@@ -217,6 +219,8 @@ class @OutputPane extends LeafPane
 					}
 					body {
 						font-family: Helvetica, sans-serif;
+						background: black;
+						color: white;
 					}
 				</style>
 			"""
@@ -249,7 +253,7 @@ class @OutputPane extends LeafPane
 						<meta name="viewport" content="width=device-width, initial-scale=1">
 						#{head}
 					</head>
-					<body style='background:black;color:white;'>
+					<body>
 						#{body}
 					</body>
 				</html>
