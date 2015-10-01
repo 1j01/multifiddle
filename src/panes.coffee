@@ -341,40 +341,6 @@ class @EditorPane extends Pane
 			trigger_code_change()
 			$pane.loading "done"
 			editor.setReadOnly no
-			if @firepad.isHistoryEmpty()
-				@firepad.setText (
-					javascript: '''
-						// JavaScript
-						
-						document.write("Hello World!");
-						
-					'''
-					coffee: '''
-						
-						spans = 
-							for char in "Hello World from CoffeeScript!"
-								span = document.createElement("span")
-								document.body.appendChild(span)
-								span.innerHTML = char
-								span
-						
-						t = 0
-						rainbow = ->
-							t += 0.05
-							for span, i in spans
-								span.style.color = "hsl(#{
-									Math.sin(t - i / 23) * 360
-								},100%,80%)"
-						
-						setInterval rainbow, 30
-						
-					'''
-					css: '''
-						body {
-							font-family: Helvetica, sans-serif;
-						}
-					'''
-				)[lang] ? ""
 	
 	layout: ->
 		@editor.resize()

@@ -386,17 +386,9 @@
       this.firepad = Firepad.fromACE(fb_fp, editor);
       this.firepad.on('ready', (function(_this) {
         return function() {
-          var ref;
           trigger_code_change();
           $pane.loading("done");
-          editor.setReadOnly(false);
-          if (_this.firepad.isHistoryEmpty()) {
-            return _this.firepad.setText((ref = {
-              javascript: '// JavaScript\n\ndocument.write("Hello World!");\n',
-              coffee: '\nspans = \n	for char in "Hello World from CoffeeScript!"\n		span = document.createElement("span")\n		document.body.appendChild(span)\n		span.innerHTML = char\n		span\n\nt = 0\nrainbow = ->\n	t += 0.05\n	for span, i in spans\n		span.style.color = "hsl(#{\n			Math.sin(t - i / 23) * 360\n		},100%,80%)"\n\nsetInterval rainbow, 30\n',
-              css: 'body {\n	font-family: Helvetica, sans-serif;\n}'
-            }[lang]) != null ? ref : "");
-          }
+          return editor.setReadOnly(false);
         };
       })(this));
     }
