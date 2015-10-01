@@ -20,14 +20,15 @@ iframe {
 iframe {
 	overflow: auto;
 }
+.dragging iframe {
+	pointer-events: none;
+}
 
 /* .pane{overflow:visible} This breaks the layout and makes it look all pretty,
 because without this the box-shadow below doesn't display everywhere it should. */
 .leaf-pane {
 	box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
-}
-.dragging iframe {
-	pointer-events: none;
+	position: relative; /* for .label positioning */
 }
 .col-resizing * { cursor: col-resize !important; }
 .row-resizing * { cursor: row-resize !important; }
@@ -44,6 +45,28 @@ because without this the box-shadow below doesn't display everywhere it should. 
 }
 .show-output-only .leaf-pane:not(.output-pane) {
 	visibility: hidden;
+}
+.show-output-only .label {
+	display: none;
+}
+
+.label {
+	position: absolute;
+	right: 0;
+	top: 0;
+	z-index: 10;
+	margin: 2px;
+	border: 0;
+	border-radius: 2px;
+	background: black;
+	color: white;
+	opacity: 0.3;
+	text-transform: uppercase;
+	padding: 3px 5px;
+}
+
+.ace_hidden-cursors {
+	opacity: 0;
 }
 
 ::-webkit-scrollbar {

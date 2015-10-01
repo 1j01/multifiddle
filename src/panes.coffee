@@ -19,7 +19,7 @@ class @PanesPane extends Pane
 	resizer_size = 10
 	
 	constructor: ({orientation})->
-		super()
+		super
 		@$.addClass "panes-pane"
 		
 		@orientation = orientation or "y"
@@ -142,14 +142,26 @@ class @PanesPane extends Pane
 		for child_pane in @children
 			child_pane.destroy?()
 
-class @OutputPane extends Pane
+class @LeafPane extends Pane
+	@instances = []
+	constructor: ({lang, project})->
+		LeafPane.instances.push @
+		super
+		$pane = @$
+		$pane.addClass "leaf-pane"
+		
+		$label = $(E 'button').addClass("label")
+		$label.appendTo $pane
+		$label.text lang ? "output"
+
+class @OutputPane extends LeafPane
 	constructor: ({project})->
-		super()
+		super
 		
 		disable_output_key = "prevent running #{project.fb.key()}"
 		
-		@$.addClass "output-pane leaf-pane"
 		$pane = @$
+		$pane.addClass "output-pane"
 		@_codes_previous = {}
 		@_coffee_body = ""
 		
@@ -299,13 +311,13 @@ class @OutputPane extends Pane
 			else
 				run()
 
-class @EditorPane extends Pane
+class @EditorPane extends LeafPane
 	@instances = []
 	constructor: ({lang, project})->
 		EditorPane.instances.push @
-		super()
-		@$.addClass "editor-pane leaf-pane"
+		super
 		$pane = @$
+		$pane.addClass "editor-pane"
 		
 		trigger_code_change = ->
 			project.codes[lang] = editor.getValue()
@@ -327,6 +339,7 @@ class @EditorPane extends Pane
 		editor.setShowPrintMargin no
 		editor.setReadOnly yes
 		editor.setSelectionStyle "text" # because this is what your selection will look like to other people
+		editor.setOption "highlightActiveLine", no
 		editor.$blockScrolling = Infinity # I don't know if I actually want this
 		session.setUseWrapMode no
 		session.setUseWorker (lang isnt "html") # html linter recommends full html (<!doctype> etc.)

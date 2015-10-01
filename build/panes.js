@@ -40,7 +40,7 @@
     function PanesPane(arg) {
       var orientation;
       orientation = arg.orientation;
-      PanesPane.__super__.constructor.call(this);
+      PanesPane.__super__.constructor.apply(this, arguments);
       this.$.addClass("panes-pane");
       this.orientation = orientation || "y";
       this.children = [];
@@ -221,16 +221,37 @@
 
   })(Pane);
 
+  this.LeafPane = (function(superClass) {
+    extend(LeafPane, superClass);
+
+    LeafPane.instances = [];
+
+    function LeafPane(arg) {
+      var $label, $pane, lang, project;
+      lang = arg.lang, project = arg.project;
+      LeafPane.instances.push(this);
+      LeafPane.__super__.constructor.apply(this, arguments);
+      $pane = this.$;
+      $pane.addClass("leaf-pane");
+      $label = $(E('button')).addClass("label");
+      $label.appendTo($pane);
+      $label.text(lang != null ? lang : "output");
+    }
+
+    return LeafPane;
+
+  })(Pane);
+
   this.OutputPane = (function(superClass) {
     extend(OutputPane, superClass);
 
     function OutputPane(arg) {
       var $iframe, $pane, disable_output_key, iframe, project, wait_then;
       project = arg.project;
-      OutputPane.__super__.constructor.call(this);
+      OutputPane.__super__.constructor.apply(this, arguments);
       disable_output_key = "prevent running " + (project.fb.key());
-      this.$.addClass("output-pane leaf-pane");
       $pane = this.$;
+      $pane.addClass("output-pane");
       this._codes_previous = {};
       this._coffee_body = "";
       $iframe = $(iframe = E('iframe')).attr({
@@ -350,7 +371,7 @@
 
     return OutputPane;
 
-  })(Pane);
+  })(LeafPane);
 
   this.EditorPane = (function(superClass) {
     extend(EditorPane, superClass);
@@ -361,9 +382,9 @@
       var $pad, $pane, editor, fb_fp, lang, project, session, trigger_code_change;
       lang = arg.lang, project = arg.project;
       EditorPane.instances.push(this);
-      EditorPane.__super__.constructor.call(this);
-      this.$.addClass("editor-pane leaf-pane");
+      EditorPane.__super__.constructor.apply(this, arguments);
       $pane = this.$;
+      $pane.addClass("editor-pane");
       trigger_code_change = function() {
         project.codes[lang] = editor.getValue();
         return project.$codes.triggerHandler("change", lang);
@@ -378,6 +399,7 @@
       editor.setShowPrintMargin(false);
       editor.setReadOnly(true);
       editor.setSelectionStyle("text");
+      editor.setOption("highlightActiveLine", false);
       editor.$blockScrolling = Infinity;
       session.setUseWrapMode(false);
       session.setUseWorker(lang !== "html");
@@ -417,6 +439,6 @@
 
     return EditorPane;
 
-  })(Pane);
+  })(LeafPane);
 
 }).call(this);
