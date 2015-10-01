@@ -152,7 +152,13 @@ class @LeafPane extends Pane
 		
 		$label = $(E 'button').addClass("label")
 		$label.appendTo $pane
-		$label.text lang ? "output"
+		$label.text switch lang
+			when "coffee" then "CoffeeScript"
+			when "js" then "JavaScript"
+			when "css" then "CSS"
+			when "html" then "HTML"
+			when undefined then "Output"
+			else "#{lang}".toUpperCase()
 
 class @OutputPane extends LeafPane
 	constructor: ({project})->

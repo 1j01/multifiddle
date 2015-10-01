@@ -235,7 +235,22 @@
       $pane.addClass("leaf-pane");
       $label = $(E('button')).addClass("label");
       $label.appendTo($pane);
-      $label.text(lang != null ? lang : "output");
+      $label.text((function() {
+        switch (lang) {
+          case "coffee":
+            return "CoffeeScript";
+          case "js":
+            return "JavaScript";
+          case "css":
+            return "CSS";
+          case "html":
+            return "HTML";
+          case void 0:
+            return "Output";
+          default:
+            return ("" + lang).toUpperCase();
+        }
+      })());
     }
 
     return LeafPane;
