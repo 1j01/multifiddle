@@ -332,17 +332,17 @@
           $pane.loading();
           $errors.empty();
           head = body = "";
-          error_handling = function() {
+          error_handling = function(parent_origin) {
             return window.onerror = function(error) {
               var message;
               message = {
                 type: "error",
                 error: error.toString()
               };
-              return parent.postMessage(JSON.stringify(message), "file://");
+              return parent.postMessage(JSON.stringify(message), parent_origin);
             };
           };
-          body += "<script>~" + error_handling + "()</script>";
+          body += "<script>~" + error_handling + "(" + (JSON.stringify(location.origin)) + ")</script>";
           head += "<style>\n	body {\n		font-family: Helvetica, sans-serif;\n		background: black;\n		color: white;\n	}\n</style>";
           if (codes.html) {
             body += codes.html;

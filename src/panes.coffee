@@ -222,7 +222,7 @@ class @OutputPane extends LeafPane
 			
 			head = body = ""
 			
-			error_handling = ->
+			error_handling = (parent_origin)->
 				# window.addEventListener "message", (e)->
 				# 	message = try JSON.parse e.data
 				# 	console.error "Message from #{e.origin}:", message
@@ -237,10 +237,10 @@ class @OutputPane extends LeafPane
 					message =
 						type: "error"
 						error: error.toString()
-					parent.postMessage JSON.stringify(message), "file://"
+					parent.postMessage JSON.stringify(message), parent_origin
 			
 			body += """
-				<script>~#{error_handling}()</script>
+				<script>~#{error_handling}(#{JSON.stringify location.origin})</script>
 			"""
 			head += """
 				<style>
