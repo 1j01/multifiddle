@@ -164,7 +164,10 @@ class @OutputPane extends LeafPane
 	constructor: ({project})->
 		super
 		
-		disable_output_key = "prevent running #{project.fb.key()}"
+		@disable_output_key = "prevent running #{project.fb.key()}"
+		@disable_output = localStorage[@disable_output_key]?
+		@loaded = no
+		@destroyed = no
 		
 		$pane = @$
 		$pane.addClass "output-pane"
@@ -181,6 +184,10 @@ class @OutputPane extends LeafPane
 					fn args...
 				, 600
 		project.$codes.on "change", wait_then =>
+			
+			# Since we're waiting before responding to change events, we might get here after this pane is destroyed
+			return if @destroyed
+			
 			{codes} = project
 			
 			all_languages_are_there = true
@@ -260,18 +267,16 @@ class @OutputPane extends LeafPane
 			"""
 			
 			run = =>
-				localStorage[disable_output_key] = on
+				localStorage[@disable_output_key] = on
 				$pane.find(".disabled-output").remove()
 				$iframe.show()
-				$(window).on "beforeunload", ->
-					delete localStorage[disable_output_key]
+				$(window).on "beforeunload", =>
+					if @loaded
+						delete localStorage[@disable_output_key]
 					return
-				$iframe.on "load", ->
+				$iframe.on "load", =>
 					$pane.loading "done"
-					setTimeout ->
-						# if after 500ms it hasn't crashed, that's good
-						delete localStorage[disable_output_key]
-					, 500
+					@loaded = yes
 				# if browser supports srcdoc
 				if typeof $iframe[0].srcdoc is "string"
 					$iframe.attr srcdoc: html
@@ -288,7 +293,7 @@ class @OutputPane extends LeafPane
 					@_codes_previous[lang] = code
 			
 			$pane.find(".disabled-output").remove()
-			if localStorage[disable_output_key]
+			if @disable_output
 				$pane.loading "done"
 				$iframe.hide()
 				$disabled_output = $("<div>")
@@ -320,6 +325,15 @@ class @OutputPane extends LeafPane
 				$pane.append $disabled_output
 			else
 				run()
+	
+	destroy: ->
+		# If the output was not disabled (and implicitly, it hasn't crashed)
+		# Or the output was disabled but the user clicked run and it loaded (without crashing)
+		if (not @disable_output) or (@disable_output and @loaded)
+			delete localStorage[@disable_output_key]
+		
+		@destroyed = yes
+
 
 class @EditorPane extends LeafPane
 	@instances = []

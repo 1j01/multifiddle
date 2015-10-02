@@ -261,10 +261,13 @@
     extend(OutputPane, superClass);
 
     function OutputPane(arg) {
-      var $iframe, $pane, disable_output_key, iframe, project, wait_then;
+      var $iframe, $pane, iframe, project, wait_then;
       project = arg.project;
       OutputPane.__super__.constructor.apply(this, arguments);
-      disable_output_key = "prevent running " + (project.fb.key());
+      this.disable_output_key = "prevent running " + (project.fb.key());
+      this.disable_output = localStorage[this.disable_output_key] != null;
+      this.loaded = false;
+      this.destroyed = false;
       $pane = this.$;
       $pane.addClass("output-pane");
       this._codes_previous = {};
@@ -289,6 +292,9 @@
       project.$codes.on("change", wait_then((function(_this) {
         return function() {
           var $disabled_output, all_languages_are_there, body, codes, e, error_handling, expected_lang, head, html, j, js, len, ref, run;
+          if (_this.destroyed) {
+            return;
+          }
           codes = project.codes;
           all_languages_are_there = true;
           ref = project.languages;
@@ -342,17 +348,17 @@
           html = "<!doctype html>\n<html>\n	<head>\n		<meta charset=\"utf-8\">\n		<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n		" + head + "\n	</head>\n	<body>\n		" + body + "\n	</body>\n</html>";
           run = function() {
             var data_uri;
-            localStorage[disable_output_key] = true;
+            localStorage[_this.disable_output_key] = true;
             $pane.find(".disabled-output").remove();
             $iframe.show();
             $(window).on("beforeunload", function() {
-              delete localStorage[disable_output_key];
+              if (_this.loaded) {
+                delete localStorage[_this.disable_output_key];
+              }
             });
             $iframe.on("load", function() {
               $pane.loading("done");
-              return setTimeout(function() {
-                return delete localStorage[disable_output_key];
-              }, 500);
+              return _this.loaded = true;
             });
             if (typeof $iframe[0].srcdoc === "string") {
               $iframe.attr({
@@ -373,7 +379,7 @@
             });
           };
           $pane.find(".disabled-output").remove();
-          if (localStorage[disable_output_key]) {
+          if (_this.disable_output) {
             $pane.loading("done");
             $iframe.hide();
             $disabled_output = $("<div>").addClass("disabled-output").append($("<button>").click(run).append($('<svg height="48" viewBox="0 0 48 48" width="48" xmlns="http://www.w3.org/2000/svg">\n	<defs xmlns="http://www.w3.org/2000/svg">\n		<filter id="drop-shadow" height="130%">\n			<feOffset dx="0" dy="2" in="SourceAlpha"/>\n			<feMerge>\n				<feMergeNode/>\n				<feMergeNode in="SourceGraphic"/>\n			</feMerge>\n		</filter>\n		<filter id="recessed" height="130%">\n			<feOffset dx="0" dy="2" in="SourceGraphic"/>\n		</filter>\n	</defs>\n	<path d="M20 33l12-9-12-9v18zm4-29C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16z"/>\n</svg>')), $("<p>This might crash...</p>"));
@@ -384,6 +390,13 @@
         };
       })(this)));
     }
+
+    OutputPane.prototype.destroy = function() {
+      if ((!this.disable_output) || (this.disable_output && this.loaded)) {
+        delete localStorage[this.disable_output_key];
+      }
+      return this.destroyed = true;
+    };
 
     return OutputPane;
 
