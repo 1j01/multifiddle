@@ -174,7 +174,7 @@ class @OutputPane extends LeafPane
 		@_codes_previous = {}
 		@_coffee_body = ""
 		
-		$iframe = $(iframe = E 'iframe').attr(sandbox: "allow-same-origin allow-scripts allow-forms", allowfullscreen: yes)
+		$iframe = $(iframe = E 'iframe').attr(sandbox: "allow-scripts allow-forms", allowfullscreen: yes)
 		$iframe.appendTo $pane
 		wait_then = (fn)->
 			tid = -1
