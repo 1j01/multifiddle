@@ -261,7 +261,7 @@
     extend(OutputPane, superClass);
 
     function OutputPane(arg) {
-      var $iframe, $pane, iframe, project, wait_then;
+      var $errors, $iframe, $pane, iframe, project, show_error, wait_then;
       project = arg.project;
       OutputPane.__super__.constructor.apply(this, arguments);
       this.disable_output_key = "prevent running " + (project.fb.key());
@@ -272,11 +272,33 @@
       $pane.addClass("output-pane");
       this._codes_previous = {};
       this._coffee_body = "";
+      $errors = $(E('div')).addClass("errors");
+      $errors.appendTo($pane);
       $iframe = $(iframe = E('iframe')).attr({
         sandbox: "allow-scripts allow-forms",
         allowfullscreen: true
       });
       $iframe.appendTo($pane);
+      show_error = function(text) {
+        var $error;
+        $error = $(E("div")).addClass("error");
+        $error.text(text);
+        return $error.appendTo($errors);
+      };
+      window.addEventListener("message", function(e) {
+        var message;
+        message = (function() {
+          try {
+            return JSON.parse(e.data);
+          } catch (_error) {}
+        })();
+        switch (message != null ? message.type : void 0) {
+          case "error":
+            return show_error(message.error);
+          default:
+            return console.error("Unhandled message:", e.data);
+        }
+      });
       wait_then = function(fn) {
         var tid;
         tid = -1;
@@ -308,20 +330,20 @@
             return;
           }
           $pane.loading();
+          $errors.empty();
           head = body = "";
           error_handling = function() {
-            var d;
-            d = document.createElement("div");
-            d.className = "error bubble script-error";
             return window.onerror = function(error) {
-              document.body.appendChild(d);
-              d.style.position = "absolute";
-              d.style.borderRadius = d.style.padding = d.style.bottom = d.style.right = "5px";
-              return d.innerText = d.textContent = error;
+              var message;
+              message = {
+                type: "error",
+                error: error.toString()
+              };
+              return parent.postMessage(JSON.stringify(message), "file://");
             };
           };
           body += "<script>~" + error_handling + "()</script>";
-          head += "<style>\n	.error {\n		color: red;\n	}\n	.error.bubble {\n		background: rgba(255, 0, 0, 0.8);\n		color: white;\n	}\n	body {\n		font-family: Helvetica, sans-serif;\n		background: black;\n		color: white;\n	}\n</style>";
+          head += "<style>\n	body {\n		font-family: Helvetica, sans-serif;\n		background: black;\n		color: white;\n	}\n</style>";
           if (codes.html) {
             body += codes.html;
           }
@@ -339,7 +361,8 @@
                   return "<script>" + js + "</script>";
                 } catch (_error) {
                   e = _error;
-                  return "<h4 class='error'>CoffeeScript Compilation Error</h4>\n<p>" + e.message + "</p>";
+                  show_error("CoffeeScript Compilation Error: " + e.message);
+                  return "";
                 }
               })();
             }

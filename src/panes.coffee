@@ -174,8 +174,26 @@ class @OutputPane extends LeafPane
 		@_codes_previous = {}
 		@_coffee_body = ""
 		
+		$errors = $(E 'div').addClass "errors"
+		$errors.appendTo $pane
+		
 		$iframe = $(iframe = E 'iframe').attr(sandbox: "allow-scripts allow-forms", allowfullscreen: yes)
 		$iframe.appendTo $pane
+		
+		show_error = (text)->
+			$error = $(E "div").addClass "error"
+			$error.text text
+			$error.appendTo $errors
+		
+		window.addEventListener "message", (e)->
+			message = try JSON.parse e.data
+			# console.log "Message from #{e.origin}:", message
+			switch message?.type
+				when "error"
+					show_error message.error
+				else
+					console.error "Unhandled message:", e.data
+		
 		wait_then = (fn)->
 			tid = -1
 			(args...)->
@@ -183,6 +201,7 @@ class @OutputPane extends LeafPane
 				tid = setTimeout ->
 					fn args...
 				, 600
+		
 		project.$codes.on "change", wait_then =>
 			
 			# Since we're waiting before responding to change events, we might get here after this pane is destroyed
@@ -199,31 +218,32 @@ class @OutputPane extends LeafPane
 			
 			$pane.loading()
 			
+			$errors.empty()
+			
 			head = body = ""
 			
 			error_handling = ->
-				# @TODO: show this outside of the iframe
-				d = document.createElement "div"
-				d.className = "error bubble script-error"
+				# window.addEventListener "message", (e)->
+				# 	message = try JSON.parse e.data
+				# 	console.error "Message from #{e.origin}:", message
+				# 	switch message?.type
+				# 		when "..."
+				# 			
+				# 		else
+				# 			console.error "Unhandled message:", e.data
+							
 				window.onerror = (error)->
-					document.body.appendChild d
-					d.style.position = "absolute"
-					d.style.borderRadius = d.style.padding = 
-					d.style.bottom = d.style.right = "5px"
-					d.innerText = d.textContent = error
+					# TODO: line numbers!
+					message =
+						type: "error"
+						error: error.toString()
+					parent.postMessage JSON.stringify(message), "file://"
 			
 			body += """
 				<script>~#{error_handling}()</script>
 			"""
 			head += """
 				<style>
-					.error {
-						color: red;
-					}
-					.error.bubble {
-						background: rgba(255, 0, 0, 0.8);
-						color: white;
-					}
 					body {
 						font-family: Helvetica, sans-serif;
 						background: black;
@@ -245,11 +265,9 @@ class @OutputPane extends LeafPane
 							js = CoffeeScript.compile codes.coffee
 							"<script>#{js}</script>"
 						catch e
-							# @TODO: show this message outside of the iframe
-							"""
-							<h4 class='error'>CoffeeScript Compilation Error</h4>
-							<p>#{e.message}</p>
-							"""
+							# TODO: line numbers!
+							show_error "CoffeeScript Compilation Error: #{e.message}"
+							""
 				body += @_coffee_body
 			
 			html = """
@@ -291,6 +309,8 @@ class @OutputPane extends LeafPane
 				
 				$.each codes, (lang, code)=>
 					@_codes_previous[lang] = code
+				
+				# iframe.contentWindow.postMessage JSON.stringify {type: "die", value:"zz z HELOO z zz"}, null
 			
 			$pane.find(".disabled-output").remove()
 			if @disable_output
