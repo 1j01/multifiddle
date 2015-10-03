@@ -103,6 +103,15 @@ body {
 	box-shadow: 0 1px rgba(239, 139, 139, 0.3) inset;
 }
 
+.error button {
+	border: 0;
+	background: none;
+	color: #FFACAC;
+	font-size: inherit;
+	padding: 0;
+	cursor: pointer;
+}
+
 .ace_hidden-cursors {
 	opacity: 0;
 }

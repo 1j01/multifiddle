@@ -333,11 +333,11 @@
           $errors.empty();
           head = body = "";
           error_handling = function(parent_origin) {
-            return window.onerror = function(error) {
+            return window.onerror = function(error_message, src, lineno, linecol, error) {
               var message;
               message = {
                 type: "error",
-                error: error.toString()
+                error: error_message
               };
               return parent.postMessage(JSON.stringify(message), parent_origin);
             };
@@ -361,7 +361,11 @@
                   return "<script>" + js + "</script>";
                 } catch (_error) {
                   e = _error;
-                  show_error("CoffeeScript Compilation Error: " + e.message);
+                  if (e.location != null) {
+                    show_error("CoffeeScript Compilation Error on line " + (e.location.first_line + 1) + ": " + e.message);
+                  } else {
+                    show_error("CoffeeScript Compilation Error: " + e.message);
+                  }
                   return "";
                 }
               })();

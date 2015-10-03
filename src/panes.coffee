@@ -183,11 +183,26 @@ class @OutputPane extends LeafPane
 		show_error = (text)->
 			$error = $(E "div").addClass "error"
 			$error.text text
+			# if match = text.match /line (\d+)/
+			# 	line_text = match[0]
+			# 	line_number = parseInt match[1]
+			# 	
+			# 	go_to_line = ->
+			# 		editor.resize true
+			# 		editor.scrollToLine 50, yes, yes, ->
+			# 		editor.gotoLine 50, 10, yes
+			# 	
+			# 	$error.append(
+			# 		document.createTextNode text.slice 0, match.index
+			# 		$(E "button").text(line_text).click go_to_line
+			# 		document.createTextNode text.slice match.index + line_text.length
+			# 	)
+			# else
+			# 	$error.text text
 			$error.appendTo $errors
 		
 		window.addEventListener "message", (e)->
 			message = try JSON.parse e.data
-			# console.log "Message from #{e.origin}:", message
 			switch message?.type
 				when "error"
 					show_error message.error
@@ -232,11 +247,12 @@ class @OutputPane extends LeafPane
 				# 		else
 				# 			console.error "Unhandled message:", e.data
 							
-				window.onerror = (error)->
+				window.onerror = (error_message, src, lineno, linecol, error)->
 					# TODO: line numbers!
+					# console.log "args:", error_message, src, lineno, linecol, error
 					message =
 						type: "error"
-						error: error.toString()
+						error: error_message
 					parent.postMessage JSON.stringify(message), parent_origin
 			
 			body += """
@@ -263,10 +279,18 @@ class @OutputPane extends LeafPane
 					@_coffee_body =
 						try
 							js = CoffeeScript.compile codes.coffee
+							# {js, v3SourceMap} = CoffeeScript.compile codes.coffee, sourceMap: yes, inline: yes
+							# js = """
+							# 	#{js}
+							# 	//# sourceMappingURL=data:application/json;base64,#{btoa unescape encodeURIComponent v3SourceMap}
+							# 	//# sourceURL=fiddle-content
+							# """
 							"<script>#{js}</script>"
 						catch e
-							# TODO: line numbers!
-							show_error "CoffeeScript Compilation Error: #{e.message}"
+							if e.location?
+								show_error "CoffeeScript Compilation Error on line #{e.location.first_line + 1}: #{e.message}"
+							else
+								show_error "CoffeeScript Compilation Error: #{e.message}"
 							""
 				body += @_coffee_body
 			
