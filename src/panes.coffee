@@ -3,7 +3,7 @@ $G = $(G = window)
 
 E = (tagname)-> document.createElement tagname
 
-hell = (b)-> b # boolean intensifier
+{SourceMapConsumer} = sourceMap
 
 class @Pane
 	constructor: ->
@@ -189,7 +189,6 @@ class @OutputPane extends LeafPane
 			if match = text.match /line (\d+)/
 				go_to_error = ->
 					editor = editor_pane.editor for editor_pane in EditorPane.instances when editor_pane.lang is "coffee"
-					editor.resize true
 					editor.focus()
 					editor.scrollToLine line_number, yes, yes, ->
 					editor.gotoLine line_number, line_column, yes
@@ -207,7 +206,6 @@ class @OutputPane extends LeafPane
 		lines_before_coffee_script = null
 		v3SourceMap = null
 		source_map_consumer = null
-		{SourceMapConsumer} = window.sourceMap
 		
 		window.addEventListener "message", (e)->
 			message = try JSON.parse e.data
@@ -216,12 +214,9 @@ class @OutputPane extends LeafPane
 					{error_message, source, line, column} = message
 					if source is "fiddle-content"
 						if v3SourceMap
-							# console.log source, line, column, lines_before_coffee_script
 							line -= lines_before_coffee_script
-							source_map_consumer = new SourceMapConsumer v3SourceMap
-							# console.log line, column
-							{line, column} = r = source_map_consumer.originalPositionFor {line, column}
-							# console.log line, column, r
+							source_map_consumer ?= new SourceMapConsumer v3SourceMap
+							{line, column} = source_map_consumer.originalPositionFor {line, column}
 							show_error error_message, line, column
 						else
 							show_error error_message
@@ -301,12 +296,11 @@ class @OutputPane extends LeafPane
 				if codes.coffee != @_codes_previous.coffee
 					@_coffee_body =
 						try
-							# js = CoffeeScript.compile codes.coffee
 							{js, v3SourceMap} = CoffeeScript.compile codes.coffee, sourceMap: yes, inline: yes
 							js = """
 								#{js}
 								//# sourceMappingURL=data:application/json;base64,#{btoa unescape encodeURIComponent v3SourceMap}
-								//# sourceURL=fiddle-content
+								//# sourceURL=fiddle-content.coffee
 							"""
 							"<script id=\"coffee-script\">#{js}</script>"
 						catch e
@@ -333,13 +327,9 @@ class @OutputPane extends LeafPane
 			
 			lines_before_coffee_script = null
 			coffee_script_index = html.indexOf "<script id=\"coffee-script\">"
-			# console.log "html", html
-			# console.log "coffee_script_index", coffee_script_index
 			if coffee_script_index >= 0
 				before_coffee_script = html.slice(0, coffee_script_index)
-				# console.log before_coffee_script
 				lines_before_coffee_script = before_coffee_script.split("\n").length - 1
-				# console.log lines_before_coffee_script
 			
 			run = =>
 				localStorage[@disable_output_key] = on
@@ -445,7 +435,7 @@ class @EditorPane extends LeafPane
 		editor.$blockScrolling = Infinity # I don't know if I actually want this, just hiding a warning
 		session.setUseWrapMode no
 		session.setUseWorker (lang isnt "html") # html linter recommends full html (<!doctype> etc.) which we don't want
-		session.setUseSoftTabs hell no
+		session.setUseSoftTabs no
 		session.setMode "ace/mode/#{lang}"
 		
 		# Create Firepad
