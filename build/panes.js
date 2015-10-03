@@ -280,9 +280,29 @@
       });
       $iframe.appendTo($pane);
       show_error = function(text) {
-        var $error;
+        var $error, go_to_line, line_number, line_text, match;
         $error = $(E("div")).addClass("error");
-        $error.text(text);
+        if (match = text.match(/line (\d+)/)) {
+          line_text = match[0];
+          line_number = parseInt(match[1]);
+          go_to_line = function() {
+            var editor, editor_pane, j, len, ref;
+            ref = EditorPane.instances;
+            for (j = 0, len = ref.length; j < len; j++) {
+              editor_pane = ref[j];
+              if (editor_pane.lang === "coffee") {
+                editor = editor_pane.editor;
+              }
+            }
+            editor.resize(true);
+            editor.focus();
+            editor.scrollToLine(line_number, true, true, function() {});
+            return editor.gotoLine(line_number, 0, true);
+          };
+          $error.append(document.createTextNode(text.slice(0, match.index)), $(E("button")).text(line_text).click(go_to_line), document.createTextNode(text.slice(match.index + line_text.length)));
+        } else {
+          $error.text(text);
+        }
         return $error.appendTo($errors);
       };
       window.addEventListener("message", function(e) {
@@ -438,6 +458,7 @@
       var $pad, $pane, editor, fb_fp, lang, project, session, trigger_code_change;
       lang = arg.lang, project = arg.project;
       EditorPane.instances.push(this);
+      this.lang = lang;
       EditorPane.__super__.constructor.apply(this, arguments);
       $pane = this.$;
       $pane.addClass("editor-pane");

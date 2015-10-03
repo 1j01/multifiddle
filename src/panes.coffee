@@ -182,23 +182,24 @@ class @OutputPane extends LeafPane
 		
 		show_error = (text)->
 			$error = $(E "div").addClass "error"
-			$error.text text
-			# if match = text.match /line (\d+)/
-			# 	line_text = match[0]
-			# 	line_number = parseInt match[1]
-			# 	
-			# 	go_to_line = ->
-			# 		editor.resize true
-			# 		editor.scrollToLine 50, yes, yes, ->
-			# 		editor.gotoLine 50, 10, yes
-			# 	
-			# 	$error.append(
-			# 		document.createTextNode text.slice 0, match.index
-			# 		$(E "button").text(line_text).click go_to_line
-			# 		document.createTextNode text.slice match.index + line_text.length
-			# 	)
-			# else
-			# 	$error.text text
+			if match = text.match /line (\d+)/
+				line_text = match[0]
+				line_number = parseInt match[1]
+				
+				go_to_line = ->
+					editor = editor_pane.editor for editor_pane in EditorPane.instances when editor_pane.lang is "coffee"
+					editor.resize true
+					editor.focus()
+					editor.scrollToLine line_number, yes, yes, ->
+					editor.gotoLine line_number, 0, yes
+				
+				$error.append(
+					document.createTextNode text.slice 0, match.index
+					$(E "button").text(line_text).click go_to_line
+					document.createTextNode text.slice match.index + line_text.length
+				)
+			else
+				$error.text text
 			$error.appendTo $errors
 		
 		window.addEventListener "message", (e)->
@@ -383,6 +384,7 @@ class @EditorPane extends LeafPane
 	@instances = []
 	constructor: ({lang, project})->
 		EditorPane.instances.push @
+		@lang = lang
 		super
 		$pane = @$
 		$pane.addClass "editor-pane"
