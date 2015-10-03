@@ -261,7 +261,7 @@
     extend(OutputPane, superClass);
 
     function OutputPane(arg) {
-      var $errors, $iframe, $pane, iframe, project, show_error, wait_then;
+      var $errors, $iframe, $pane, SourceMapConsumer, iframe, lines_before_coffee_script, project, show_error, source_map_consumer, v3SourceMap, wait_then;
       project = arg.project;
       OutputPane.__super__.constructor.apply(this, arguments);
       this.disable_output_key = "prevent running " + (project.fb.key());
@@ -282,6 +282,9 @@
       show_error = function(text, line_number, line_column) {
         var $error, go_to_error, match;
         $error = $(E("div")).addClass("error");
+        if (line_number && !text.match(/line (\d+)/)) {
+          text = "On line " + line_number + ": " + text;
+        }
         if (match = text.match(/line (\d+)/)) {
           go_to_error = function() {
             var editor, editor_pane, j, len, ref;
@@ -303,8 +306,12 @@
         }
         return $error.appendTo($errors);
       };
+      lines_before_coffee_script = null;
+      v3SourceMap = null;
+      source_map_consumer = null;
+      SourceMapConsumer = window.sourceMap.SourceMapConsumer;
       window.addEventListener("message", function(e) {
-        var message;
+        var column, error_message, line, message, r, ref, source;
         message = (function() {
           try {
             return JSON.parse(e.data);
@@ -312,7 +319,23 @@
         })();
         switch (message != null ? message.type : void 0) {
           case "error":
-            return show_error(message.error);
+            error_message = message.error_message, source = message.source, line = message.line, column = message.column;
+            if (source === "fiddle-content") {
+              if (v3SourceMap) {
+                line -= lines_before_coffee_script;
+                source_map_consumer = new SourceMapConsumer(v3SourceMap);
+                ref = r = source_map_consumer.originalPositionFor({
+                  line: line,
+                  column: column
+                }), line = ref.line, column = ref.column;
+                return show_error(error_message, line, column);
+              } else {
+                return show_error(error_message);
+              }
+            } else {
+              return show_error(error_message);
+            }
+            break;
           default:
             return console.error("Unhandled message:", e.data);
         }
@@ -331,7 +354,7 @@
       };
       project.$codes.on("change", wait_then((function(_this) {
         return function() {
-          var $disabled_output, all_languages_are_there, body, codes, e, error_handling, expected_lang, head, html, j, js, len, ref, run;
+          var $disabled_output, all_languages_are_there, before_coffee_script, body, codes, coffee_script_index, e, error_handling, expected_lang, head, html, j, js, len, ref, run;
           if (_this.destroyed) {
             return;
           }
@@ -349,13 +372,17 @@
           }
           $pane.loading();
           $errors.empty();
+          source_map_consumer = null;
           head = body = "";
           error_handling = function(parent_origin) {
-            return window.onerror = function(error_message, src, lineno, linecol, error) {
+            return window.onerror = function(error_message, source, line, column, error) {
               var message;
               message = {
                 type: "error",
-                error: error_message
+                error_message: error_message,
+                source: source,
+                line: line,
+                column: column
               };
               return parent.postMessage(JSON.stringify(message), parent_origin);
             };
@@ -374,9 +401,14 @@
           if (codes.coffee) {
             if (codes.coffee !== _this._codes_previous.coffee) {
               _this._coffee_body = (function() {
+                var ref1;
                 try {
-                  js = CoffeeScript.compile(codes.coffee);
-                  return "<script>" + js + "</script>";
+                  ref1 = CoffeeScript.compile(codes.coffee, {
+                    sourceMap: true,
+                    inline: true
+                  }), js = ref1.js, v3SourceMap = ref1.v3SourceMap;
+                  js = js + "\n//# sourceMappingURL=data:application/json;base64," + (btoa(unescape(encodeURIComponent(v3SourceMap)))) + "\n//# sourceURL=fiddle-content";
+                  return "<script id=\"coffee-script\">" + js + "</script>";
                 } catch (_error) {
                   e = _error;
                   if (e.location != null) {
@@ -391,6 +423,12 @@
             body += _this._coffee_body;
           }
           html = "<!doctype html>\n<html>\n	<head>\n		<meta charset=\"utf-8\">\n		<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n		" + head + "\n	</head>\n	<body>\n		" + body + "\n	</body>\n</html>";
+          lines_before_coffee_script = null;
+          coffee_script_index = html.indexOf("<script id=\"coffee-script\">");
+          if (coffee_script_index >= 0) {
+            before_coffee_script = html.slice(0, coffee_script_index);
+            lines_before_coffee_script = before_coffee_script.split("\n").length - 1;
+          }
           run = function() {
             var data_uri;
             localStorage[_this.disable_output_key] = true;

@@ -182,6 +182,10 @@ class @OutputPane extends LeafPane
 		
 		show_error = (text, line_number, line_column)->
 			$error = $(E "div").addClass "error"
+			
+			if line_number and not text.match /line (\d+)/
+				text = "On line #{line_number}: #{text}"
+			
 			if match = text.match /line (\d+)/
 				go_to_error = ->
 					editor = editor_pane.editor for editor_pane in EditorPane.instances when editor_pane.lang is "coffee"
@@ -197,13 +201,32 @@ class @OutputPane extends LeafPane
 				)
 			else
 				$error.text text
+			
 			$error.appendTo $errors
+		
+		lines_before_coffee_script = null
+		v3SourceMap = null
+		source_map_consumer = null
+		{SourceMapConsumer} = window.sourceMap
 		
 		window.addEventListener "message", (e)->
 			message = try JSON.parse e.data
 			switch message?.type
 				when "error"
-					show_error message.error
+					{error_message, source, line, column} = message
+					if source is "fiddle-content"
+						if v3SourceMap
+							# console.log source, line, column, lines_before_coffee_script
+							line -= lines_before_coffee_script
+							source_map_consumer = new SourceMapConsumer v3SourceMap
+							# console.log line, column
+							{line, column} = r = source_map_consumer.originalPositionFor {line, column}
+							# console.log line, column, r
+							show_error error_message, line, column
+						else
+							show_error error_message
+					else
+						show_error error_message
 				else
 					console.error "Unhandled message:", e.data
 		
@@ -233,6 +256,8 @@ class @OutputPane extends LeafPane
 			
 			$errors.empty()
 			
+			source_map_consumer = null
+			
 			head = body = ""
 			
 			error_handling = (parent_origin)->
@@ -244,13 +269,13 @@ class @OutputPane extends LeafPane
 				# 			
 				# 		else
 				# 			console.error "Unhandled message:", e.data
-							
-				window.onerror = (error_message, src, lineno, linecol, error)->
-					# TODO: line numbers!
-					# console.log "args:", error_message, src, lineno, linecol, error
-					message =
+				
+				window.onerror = (error_message, source, line, column, error)->
+					message = {
 						type: "error"
-						error: error_message
+						error_message
+						source, line, column
+					}
 					parent.postMessage JSON.stringify(message), parent_origin
 			
 			body += """
@@ -276,14 +301,14 @@ class @OutputPane extends LeafPane
 				if codes.coffee != @_codes_previous.coffee
 					@_coffee_body =
 						try
-							js = CoffeeScript.compile codes.coffee
-							# {js, v3SourceMap} = CoffeeScript.compile codes.coffee, sourceMap: yes, inline: yes
-							# js = """
-							# 	#{js}
-							# 	//# sourceMappingURL=data:application/json;base64,#{btoa unescape encodeURIComponent v3SourceMap}
-							# 	//# sourceURL=fiddle-content
-							# """
-							"<script>#{js}</script>"
+							# js = CoffeeScript.compile codes.coffee
+							{js, v3SourceMap} = CoffeeScript.compile codes.coffee, sourceMap: yes, inline: yes
+							js = """
+								#{js}
+								//# sourceMappingURL=data:application/json;base64,#{btoa unescape encodeURIComponent v3SourceMap}
+								//# sourceURL=fiddle-content
+							"""
+							"<script id=\"coffee-script\">#{js}</script>"
 						catch e
 							if e.location?
 								show_error "CoffeeScript Compilation Error on line #{e.location.first_line + 1}: #{e.message}", e.location.first_line + 1, e.location.first_column
@@ -305,6 +330,16 @@ class @OutputPane extends LeafPane
 					</body>
 				</html>
 			"""
+			
+			lines_before_coffee_script = null
+			coffee_script_index = html.indexOf "<script id=\"coffee-script\">"
+			# console.log "html", html
+			# console.log "coffee_script_index", coffee_script_index
+			if coffee_script_index >= 0
+				before_coffee_script = html.slice(0, coffee_script_index)
+				# console.log before_coffee_script
+				lines_before_coffee_script = before_coffee_script.split("\n").length - 1
+				# console.log lines_before_coffee_script
 			
 			run = =>
 				localStorage[@disable_output_key] = on
@@ -331,8 +366,6 @@ class @OutputPane extends LeafPane
 				
 				$.each codes, (lang, code)=>
 					@_codes_previous[lang] = code
-				
-				# iframe.contentWindow.postMessage JSON.stringify {type: "die", value:"zz z HELOO z zz"}, null
 			
 			$pane.find(".disabled-output").remove()
 			if @disable_output

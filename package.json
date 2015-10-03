@@ -1,6 +1,6 @@
 {
   "name": "multifiddle",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "author": "Isaiah Odhner",
   "description": "Minimalistic multilingual collaborative code-fiddling",
   "scripts": {
