@@ -180,23 +180,20 @@ class @OutputPane extends LeafPane
 		$iframe = $(iframe = E 'iframe').attr(sandbox: "allow-scripts allow-forms", allowfullscreen: yes)
 		$iframe.appendTo $pane
 		
-		show_error = (text)->
+		show_error = (text, line_number, line_column)->
 			$error = $(E "div").addClass "error"
 			if match = text.match /line (\d+)/
-				line_text = match[0]
-				line_number = parseInt match[1]
-				
-				go_to_line = ->
+				go_to_error = ->
 					editor = editor_pane.editor for editor_pane in EditorPane.instances when editor_pane.lang is "coffee"
 					editor.resize true
 					editor.focus()
 					editor.scrollToLine line_number, yes, yes, ->
-					editor.gotoLine line_number, 0, yes
+					editor.gotoLine line_number, line_column, yes
 				
 				$error.append(
 					document.createTextNode text.slice 0, match.index
-					$(E "button").text(line_text).click go_to_line
-					document.createTextNode text.slice match.index + line_text.length
+					$(E "button").text(match[0]).click go_to_error
+					document.createTextNode text.slice match.index + match[0].length
 				)
 			else
 				$error.text text
@@ -289,7 +286,7 @@ class @OutputPane extends LeafPane
 							"<script>#{js}</script>"
 						catch e
 							if e.location?
-								show_error "CoffeeScript Compilation Error on line #{e.location.first_line + 1}: #{e.message}"
+								show_error "CoffeeScript Compilation Error on line #{e.location.first_line + 1}: #{e.message}", e.location.first_line + 1, e.location.first_column
 							else
 								show_error "CoffeeScript Compilation Error: #{e.message}"
 							""

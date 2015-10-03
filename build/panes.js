@@ -279,13 +279,11 @@
         allowfullscreen: true
       });
       $iframe.appendTo($pane);
-      show_error = function(text) {
-        var $error, go_to_line, line_number, line_text, match;
+      show_error = function(text, line_number, line_column) {
+        var $error, go_to_error, match;
         $error = $(E("div")).addClass("error");
         if (match = text.match(/line (\d+)/)) {
-          line_text = match[0];
-          line_number = parseInt(match[1]);
-          go_to_line = function() {
+          go_to_error = function() {
             var editor, editor_pane, j, len, ref;
             ref = EditorPane.instances;
             for (j = 0, len = ref.length; j < len; j++) {
@@ -297,9 +295,9 @@
             editor.resize(true);
             editor.focus();
             editor.scrollToLine(line_number, true, true, function() {});
-            return editor.gotoLine(line_number, 0, true);
+            return editor.gotoLine(line_number, line_column, true);
           };
-          $error.append(document.createTextNode(text.slice(0, match.index)), $(E("button")).text(line_text).click(go_to_line), document.createTextNode(text.slice(match.index + line_text.length)));
+          $error.append(document.createTextNode(text.slice(0, match.index)), $(E("button")).text(match[0]).click(go_to_error), document.createTextNode(text.slice(match.index + match[0].length)));
         } else {
           $error.text(text);
         }
@@ -382,7 +380,7 @@
                 } catch (_error) {
                   e = _error;
                   if (e.location != null) {
-                    show_error("CoffeeScript Compilation Error on line " + (e.location.first_line + 1) + ": " + e.message);
+                    show_error("CoffeeScript Compilation Error on line " + (e.location.first_line + 1) + ": " + e.message, e.location.first_line + 1, e.location.first_column);
                   } else {
                     show_error("CoffeeScript Compilation Error: " + e.message);
                   }
