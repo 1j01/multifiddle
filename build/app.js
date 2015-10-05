@@ -63,11 +63,11 @@
           return _this.root_pane.layout();
         };
       })(this));
-      $G.on("resized", this._onresized = wait_then((function(_this) {
+      $G.on("resized", this._onresized = (function(_this) {
         return function() {
           return _this.updateIcon();
         };
-      })(this)));
+      })(this));
       this.canvas = E("canvas");
       this.canvas.width = this.canvas.height = 16;
       this.ctx = this.canvas.getContext("2d");
@@ -111,6 +111,7 @@
 
     Project.prototype.updateIcon = function() {
       var h, i, leaf_el, leaf_rect, len, ref1, root_rect, w, x, y;
+      this.ctx.save();
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       root_rect = this.root_pane.$[0].getBoundingClientRect();
       ref1 = $(".leaf-pane");
@@ -121,13 +122,31 @@
         y = this.canvas.height * (leaf_rect.top - root_rect.top) / root_rect.height;
         w = this.canvas.width * leaf_rect.width / root_rect.width;
         h = this.canvas.height * leaf_rect.height / root_rect.height;
-        this.ctx.fillStyle = "#000";
+        this.ctx.fillStyle = (function() {
+          switch ($(leaf_el).find(".label").text()) {
+            case "CoffeeScript":
+              return "#F0DB4F";
+            case "JavaScript":
+              return "#F0DB4F";
+            case "CSS":
+              return "#33A9DC";
+            case "HTML":
+              return "#F1662A";
+            case "Output":
+              return "#bd79d1";
+            default:
+              return "#000";
+          }
+        })();
         this.ctx.fillRect(~~x, ~~y, ~~w, ~~h);
-        this.ctx.fillStyle = "#000";
-        this.ctx.fillStyle = "#555";
-        this.ctx.fillRect(~~x - 1, ~~y - 1, 1, ~~h + 1);
-        this.ctx.fillRect(~~x - 1, ~~y - 1, ~~w + 1, 1);
+        this.ctx.clearRect(~~x - 1, ~~y + 0, 1, ~~h + 1);
+        this.ctx.clearRect(~~x + 0, ~~y - 1, ~~w + 1, 1);
       }
+      this.ctx.fillStyle = "lime";
+      this.ctx.globalCompositeOperation = "destination-in";
+      this.ctx.arc(this.canvas.width / 2, this.canvas.height / 2, this.canvas.height / 2 - 0.5, 0, Math.PI * 2);
+      this.ctx.fill();
+      this.ctx.restore();
       this.link.href = this.canvas.toDataURL("image/png");
       return document.head.appendChild(this.link);
     };

@@ -35,13 +35,20 @@ class @Project
 		@show what_to_show
 		
 		$G.on "resize", @_onresize = => @root_pane.layout()
-		$G.on "resized", @_onresized = wait_then => @updateIcon()
+		$G.on "resized", @_onresized = => @updateIcon()
 		
 		@canvas = E "canvas"
 		@canvas.width = @canvas.height = 16
+		# @canvas.width = @canvas.height = 160
+		# document.body.insertBefore @canvas, document.body.firstChild
+		# @canvas.style.border = "3px dotted gray"
+		# @canvas.style.margin = "31px"
 		@ctx = @canvas.getContext "2d"
 		@link = E "link"
 		@link.rel = "icon"
+		# @ctx.beginPath()
+		# @ctx.arc @canvas.width/2, @canvas.height/2, @canvas.height/2, 0, Math.PI * 2
+		# @ctx.clip()
 		@updateIcon()
 	
 	applyTheme: (theme_name)->
@@ -69,7 +76,25 @@ class @Project
 				$("body").removeClass "show-output-only"
 	
 	updateIcon: ->
+		
+		# color_for_string = (str)->
+		# 	hash = 0
+		# 	i = 0
+		# 	while i < str.length
+		# 		hash = str.charCodeAt(i) + ((hash << 5) - hash)
+		# 		i += 1
+		# 	colour = '#'
+		# 	for i in [0..2]
+		# 		value = (hash >> (i * 8)) & 0xFF
+		# 		colour += "00#{value.toString(16)}".substr(-2)
+		# 	colour
+
+		@ctx.save()
 		@ctx.clearRect 0, 0, @canvas.width, @canvas.height
+		# @ctx.fillStyle = "lime"
+		# @ctx.arc @canvas.width/2, @canvas.height/2, @canvas.height/2, 0, Math.PI * 2
+		# @ctx.fill()
+		# @ctx.globalCompositeOperation = "source-atop"
 		root_rect = @root_pane.$[0].getBoundingClientRect()
 		for leaf_el in $ ".leaf-pane"
 			leaf_rect = leaf_el.getBoundingClientRect()
@@ -78,15 +103,33 @@ class @Project
 			w = @canvas.width * leaf_rect.width / root_rect.width
 			h = @canvas.height * leaf_rect.height / root_rect.height
 			# @ctx.fillStyle = "hsl(#{~~(Math.random()*360)}, 70%, 50%)"
-			@ctx.fillStyle = "#000"
+			# @ctx.fillStyle = "#000"
+			# @ctx.fillStyle = color_for_string $(leaf_el).find(".label").text() + "---"
+			@ctx.fillStyle = switch $(leaf_el).find(".label").text()
+				when "CoffeeScript" then "#F0DB4F"
+				when "JavaScript" then "#F0DB4F"
+				when "CSS" then "#33A9DC" # "#563d7c" #FFFDFD
+				when "HTML" then "#F1662A" # "#e44b23"
+				when "Output" then "#bd79d1" #44a51c"
+				else "#000"
 			# @ctx.fillRect Math.ceil(x+0.001), Math.ceil(y+0.001), ~~w, ~~h
 			@ctx.fillRect ~~x, ~~y, ~~w, ~~h
 			# @ctx.clearRect ~~x - 1, ~~y - 1, 1, ~~h + 1
 			# @ctx.clearRect ~~x - 1, ~~y - 1, ~~w + 1, 1
-			@ctx.fillStyle = "#000"
-			@ctx.fillStyle = "#555"
-			@ctx.fillRect ~~x - 1, ~~y - 1, 1, ~~h + 1
-			@ctx.fillRect ~~x - 1, ~~y - 1, ~~w + 1, 1
+			@ctx.clearRect ~~x - 1, ~~y + 0, 1, ~~h + 1
+			@ctx.clearRect ~~x + 0, ~~y - 1, ~~w + 1, 1
+			# @ctx.fillStyle = "#000"
+			# @ctx.fillStyle = "#555"
+			# @ctx.fillRect ~~x - 1, ~~y - 1, 1, ~~h + 1
+			# @ctx.fillRect ~~x - 1, ~~y - 1, ~~w + 1, 1
+		
+		@ctx.fillStyle = "lime"
+		@ctx.globalCompositeOperation = "destination-in"
+		# @ctx.arc @canvas.width/2, @canvas.height/2, @canvas.height/2, 0, Math.PI * 2
+		@ctx.arc @canvas.width/2, @canvas.height/2, @canvas.height/2-0.5, 0, Math.PI * 2
+		@ctx.fill()
+		
+		@ctx.restore()
 		
 		@link.href = @canvas.toDataURL "image/png"
 		document.head.appendChild @link
