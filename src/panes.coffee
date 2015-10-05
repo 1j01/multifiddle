@@ -70,7 +70,7 @@ class @PanesPane extends Pane
 		parent_pane.$resizers = $()
 		
 		for before, i in parent_pane.children when after = parent_pane.children[i + 1]
-			do (before, after)->
+			do (before, after)=>
 				$resizer = $(E "div").addClass("resizer #{_col_row}-resizer")
 				$resizer.insertAfter(before.$)
 				$resizer.css _d1, resizer_size
@@ -79,7 +79,7 @@ class @PanesPane extends Pane
 				$resizer.css cursor: "#{_col_row}-resize"
 				
 				$more_resizers = $()
-				$resizer.on "mouseover mousemove", (e)->
+				$resizer.on "mouseover mousemove", (e)=>
 					if not $resizer.hasClass "drag"
 						$more_resizers = $()
 						$(".resizer").each (i, res_el)->
@@ -93,11 +93,11 @@ class @PanesPane extends Pane
 						
 						$resizer.css cursor:  (if $more_resizers.length then "move" else "#{_col_row}-resize")
 				
-				$resizer.on "mouseout", (e)->
+				$resizer.on "mouseout", (e)=>
 					if not $resizer.hasClass "drag"
 						$more_resizers = $()
 				
-				$resizer.on "mousedown", (e, synthetic)->
+				$resizer.on "mousedown", (e, synthetic)=>
 					e.preventDefault()
 					$resizer.addClass "drag"
 					$more_resizers.addClass "drag"
@@ -106,7 +106,7 @@ class @PanesPane extends Pane
 						$("body").addClass (if $more_resizers.length then "multi" else _col_row) + "-resizing"
 					$more_resizers.trigger(e, "synthetic")
 					
-					mousemove = (e)->
+					mousemove = (e)=>
 						before_start = before.$[0].getBoundingClientRect()[_d1_start]
 						after_end = after.$[0].getBoundingClientRect()[_d1_end]
 						
@@ -124,6 +124,8 @@ class @PanesPane extends Pane
 						total_size = (parent_pane.$[_d1]()) - (resizer_size * n_resizers)
 						for pane in parent_pane.children
 							pane.flex = pane.$[_d1]() / total_size * n_children
+						
+						@$.trigger "resized"
 					
 					$G.on "mousemove", mousemove
 					$G.on "mouseup", ->

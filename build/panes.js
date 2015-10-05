@@ -115,85 +115,86 @@
       for (i = k = 0, len1 = ref1.length; k < len1; i = ++k) {
         before = ref1[i];
         if (after = parent_pane.children[i + 1]) {
-          results.push((function(before, after) {
-            var $more_resizers, $resizer;
-            $resizer = $(E("div")).addClass("resizer " + _col_row + "-resizer");
-            $resizer.insertAfter(before.$);
-            $resizer.css(_d1, resizer_size);
-            $resizer.css(_d2, parent_pane.$[_d2]());
-            $resizer.css({
-              display: display
-            });
-            $resizer.css({
-              cursor: _col_row + "-resize"
-            });
-            $more_resizers = $();
-            $resizer.on("mouseover mousemove", function(e) {
-              if (!$resizer.hasClass("drag")) {
-                $more_resizers = $();
-                $(".resizer").each(function(i, res_el) {
-                  var rect, ref2;
-                  if ($resizer[0] === res_el) {
-                    return;
-                  }
-                  if (!$.contains(parent_pane.$[0], res_el)) {
-                    return;
-                  }
-                  rect = res_el.getBoundingClientRect();
-                  if ((rect[_d2_start] < (ref2 = e[_mouse_d2]) && ref2 < rect[_d2_end])) {
-                    return $more_resizers = $more_resizers.add(res_el);
-                  }
-                });
-                return $resizer.css({
-                  cursor: ($more_resizers.length ? "move" : _col_row + "-resize")
-                });
-              }
-            });
-            $resizer.on("mouseout", function(e) {
-              if (!$resizer.hasClass("drag")) {
-                return $more_resizers = $();
-              }
-            });
-            $resizer.on("mousedown", function(e, synthetic) {
-              var mousemove;
-              e.preventDefault();
-              $resizer.addClass("drag");
-              $more_resizers.addClass("drag");
-              $("body").addClass("dragging");
-              if (!synthetic) {
-                $("body").addClass(($more_resizers.length ? "multi" : _col_row) + "-resizing");
-              }
-              $more_resizers.trigger(e, "synthetic");
-              mousemove = function(e) {
-                var after_end, b, before_start, l, len2, mouse_pos, pane, ref2, results1, total_size;
-                before_start = before.$[0].getBoundingClientRect()[_d1_start];
-                after_end = after.$[0].getBoundingClientRect()[_d1_end];
-                b = resizer_size / 2 + 1;
-                mouse_pos = e[_mouse_d1];
-                mouse_pos = Math.max(before_start + b, Math.min(after_end - b, mouse_pos));
-                before.$.css(_d1, mouse_pos - before_start - resizer_size / 2);
-                after.$.css(_d1, after_end - mouse_pos - resizer_size / 2);
-                before.layout();
-                after.layout();
-                total_size = (parent_pane.$[_d1]()) - (resizer_size * n_resizers);
-                ref2 = parent_pane.children;
-                results1 = [];
-                for (l = 0, len2 = ref2.length; l < len2; l++) {
-                  pane = ref2[l];
-                  results1.push(pane.flex = pane.$[_d1]() / total_size * n_children);
-                }
-                return results1;
-              };
-              $G.on("mousemove", mousemove);
-              return $G.on("mouseup", function() {
-                $G.off("mousemove", mousemove);
-                $("body").removeClass("dragging col-resizing row-resizing multi-resizing");
-                $resizer.removeClass("drag");
-                return $more_resizers.removeClass("drag");
+          results.push((function(_this) {
+            return function(before, after) {
+              var $more_resizers, $resizer;
+              $resizer = $(E("div")).addClass("resizer " + _col_row + "-resizer");
+              $resizer.insertAfter(before.$);
+              $resizer.css(_d1, resizer_size);
+              $resizer.css(_d2, parent_pane.$[_d2]());
+              $resizer.css({
+                display: display
               });
-            });
-            return parent_pane.$resizers = parent_pane.$resizers.add($resizer);
-          })(before, after));
+              $resizer.css({
+                cursor: _col_row + "-resize"
+              });
+              $more_resizers = $();
+              $resizer.on("mouseover mousemove", function(e) {
+                if (!$resizer.hasClass("drag")) {
+                  $more_resizers = $();
+                  $(".resizer").each(function(i, res_el) {
+                    var rect, ref2;
+                    if ($resizer[0] === res_el) {
+                      return;
+                    }
+                    if (!$.contains(parent_pane.$[0], res_el)) {
+                      return;
+                    }
+                    rect = res_el.getBoundingClientRect();
+                    if ((rect[_d2_start] < (ref2 = e[_mouse_d2]) && ref2 < rect[_d2_end])) {
+                      return $more_resizers = $more_resizers.add(res_el);
+                    }
+                  });
+                  return $resizer.css({
+                    cursor: ($more_resizers.length ? "move" : _col_row + "-resize")
+                  });
+                }
+              });
+              $resizer.on("mouseout", function(e) {
+                if (!$resizer.hasClass("drag")) {
+                  return $more_resizers = $();
+                }
+              });
+              $resizer.on("mousedown", function(e, synthetic) {
+                var mousemove;
+                e.preventDefault();
+                $resizer.addClass("drag");
+                $more_resizers.addClass("drag");
+                $("body").addClass("dragging");
+                if (!synthetic) {
+                  $("body").addClass(($more_resizers.length ? "multi" : _col_row) + "-resizing");
+                }
+                $more_resizers.trigger(e, "synthetic");
+                mousemove = function(e) {
+                  var after_end, b, before_start, l, len2, mouse_pos, pane, ref2, total_size;
+                  before_start = before.$[0].getBoundingClientRect()[_d1_start];
+                  after_end = after.$[0].getBoundingClientRect()[_d1_end];
+                  b = resizer_size / 2 + 1;
+                  mouse_pos = e[_mouse_d1];
+                  mouse_pos = Math.max(before_start + b, Math.min(after_end - b, mouse_pos));
+                  before.$.css(_d1, mouse_pos - before_start - resizer_size / 2);
+                  after.$.css(_d1, after_end - mouse_pos - resizer_size / 2);
+                  before.layout();
+                  after.layout();
+                  total_size = (parent_pane.$[_d1]()) - (resizer_size * n_resizers);
+                  ref2 = parent_pane.children;
+                  for (l = 0, len2 = ref2.length; l < len2; l++) {
+                    pane = ref2[l];
+                    pane.flex = pane.$[_d1]() / total_size * n_children;
+                  }
+                  return _this.$.trigger("resized");
+                };
+                $G.on("mousemove", mousemove);
+                return $G.on("mouseup", function() {
+                  $G.off("mousemove", mousemove);
+                  $("body").removeClass("dragging col-resizing row-resizing multi-resizing");
+                  $resizer.removeClass("drag");
+                  return $more_resizers.removeClass("drag");
+                });
+              });
+              return parent_pane.$resizers = parent_pane.$resizers.add($resizer);
+            };
+          })(this)(before, after));
         }
       }
       return results;

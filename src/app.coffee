@@ -7,6 +7,14 @@ $G = $(G = window)
 
 E = (tagname)-> document.createElement tagname
 
+wait_then = (fn)->
+	tid = -1
+	(args...)->
+		clearTimeout tid
+		tid = setTimeout ->
+			fn args...
+		, 100
+
 class @Project
 	constructor: (@fb, what_to_show)->
 		# @TODO: Load from Firebase
@@ -27,6 +35,14 @@ class @Project
 		@show what_to_show
 		
 		$G.on "resize", @_onresize = => @root_pane.layout()
+		$G.on "resized", @_onresized = wait_then => @updateIcon()
+		
+		@canvas = E "canvas"
+		@canvas.width = @canvas.height = 16
+		@ctx = @canvas.getContext "2d"
+		@link = E "link"
+		@link.rel = "icon"
+		@updateIcon()
 	
 	applyTheme: (theme_name)->
 		theme = themesByName[theme_name]
@@ -41,6 +57,7 @@ class @Project
 	
 	exit: ->
 		$G.off "resize", @_onresize
+		$G.off "resize", @_onresized
 		@root_pane.destroy()
 		@root_pane.$.remove()
 	
@@ -50,6 +67,29 @@ class @Project
 				$("body").addClass "show-output-only"
 			else
 				$("body").removeClass "show-output-only"
+	
+	updateIcon: ->
+		@ctx.clearRect 0, 0, @canvas.width, @canvas.height
+		root_rect = @root_pane.$[0].getBoundingClientRect()
+		for leaf_el in $ ".leaf-pane"
+			leaf_rect = leaf_el.getBoundingClientRect()
+			x = @canvas.width * (leaf_rect.left - root_rect.left) / root_rect.width
+			y = @canvas.height * (leaf_rect.top - root_rect.top) / root_rect.height
+			w = @canvas.width * leaf_rect.width / root_rect.width
+			h = @canvas.height * leaf_rect.height / root_rect.height
+			# @ctx.fillStyle = "hsl(#{~~(Math.random()*360)}, 70%, 50%)"
+			@ctx.fillStyle = "#000"
+			# @ctx.fillRect Math.ceil(x+0.001), Math.ceil(y+0.001), ~~w, ~~h
+			@ctx.fillRect ~~x, ~~y, ~~w, ~~h
+			# @ctx.clearRect ~~x - 1, ~~y - 1, 1, ~~h + 1
+			# @ctx.clearRect ~~x - 1, ~~y - 1, ~~w + 1, 1
+			@ctx.fillStyle = "#000"
+			@ctx.fillStyle = "#555"
+			@ctx.fillRect ~~x - 1, ~~y - 1, 1, ~~h + 1
+			@ctx.fillRect ~~x - 1, ~~y - 1, ~~w + 1, 1
+		
+		@link.href = @canvas.toDataURL "image/png"
+		document.head.appendChild @link
 
 
 fb_root = new Firebase "https://multifiddle.firebaseio.com/"
