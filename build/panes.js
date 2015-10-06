@@ -260,7 +260,7 @@
     extend(OutputPane, superClass);
 
     function OutputPane(arg) {
-      var $errors, $iframe, $pane, iframe, lines_before_coffee_script, project, show_error, source_map_consumer, v3SourceMap, wait_then;
+      var $errors, $iframe, $pane, iframe, lines_before_coffee_script, project, scroll_x, scroll_y, show_error, source_map_consumer, v3SourceMap, wait_then;
       project = arg.project;
       OutputPane.__super__.constructor.apply(this, arguments);
       this.disable_output_key = "prevent running " + (project.fb.key());
@@ -307,6 +307,8 @@
       lines_before_coffee_script = null;
       v3SourceMap = null;
       source_map_consumer = null;
+      scroll_x = null;
+      scroll_y = null;
       window.addEventListener("message", function(e) {
         var column, error_message, line, message, ref, source;
         message = (function() {
@@ -335,6 +337,9 @@
               return show_error(error_message);
             }
             break;
+          case "scroll":
+            scroll_x = message.x;
+            return scroll_y = message.y;
           default:
             return console.error("Unhandled message:", e.data);
         }
@@ -353,7 +358,7 @@
       };
       project.$codes.on("change", wait_then((function(_this) {
         return function() {
-          var $disabled_output, all_languages_are_there, before_coffee_script, body, codes, coffee_script_index, e, error_handling, expected_lang, head, html, j, js, len, ref, run;
+          var $disabled_output, all_languages_are_there, before_coffee_script, body, codes, coffee_script_index, e, expected_lang, frame_code, head, html, j, js, len, ref, run;
           if (_this.destroyed) {
             return;
           }
@@ -373,7 +378,34 @@
           $errors.empty();
           source_map_consumer = null;
           head = body = "";
-          error_handling = function(parent_origin) {
+          frame_code = function(parent_origin, scroll_x, scroll_y) {
+            window.addEventListener("DOMContentLoaded", function(e) {
+              return window.scrollTo(scroll_x, scroll_y);
+            });
+            window.addEventListener("message", function(e) {
+              var message;
+              message = (function() {
+                try {
+                  return JSON.parse(e.data);
+                } catch (_error) {}
+              })();
+              console.error("Message from " + e.origin + ":", message);
+              switch (message != null ? message.type : void 0) {
+                case "scrollTo":
+                  return window.scrollTo(message.x, message.y);
+                default:
+                  return console.error("Unhandled message:", e.data);
+              }
+            });
+            window.addEventListener("scroll", function(e) {
+              var message;
+              message = {
+                type: "scroll",
+                x: window.scrollX,
+                y: window.scrollY
+              };
+              return parent.postMessage(JSON.stringify(message), parent_origin);
+            });
             return window.onerror = function(error_message, source, line, column, error) {
               var message;
               message = {
@@ -386,7 +418,7 @@
               return parent.postMessage(JSON.stringify(message), parent_origin);
             };
           };
-          body += "<script>~" + error_handling + "(" + (JSON.stringify(location.origin)) + ")</script>";
+          body += "<script>(" + frame_code + ")(" + (JSON.stringify(location.origin)) + ", " + (JSON.stringify(scroll_x)) + ", " + (JSON.stringify(scroll_y)) + ")</script>";
           head += "<style>\n	body {\n		font-family: Helvetica, sans-serif;\n		background: black;\n		color: white;\n	}\n</style>";
           if (codes.html) {
             body += codes.html;

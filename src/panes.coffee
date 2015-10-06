@@ -209,6 +209,9 @@ class @OutputPane extends LeafPane
 		v3SourceMap = null
 		source_map_consumer = null
 		
+		scroll_x = null
+		scroll_y = null
+		
 		window.addEventListener "message", (e)->
 			message = try JSON.parse e.data
 			switch message?.type
@@ -224,6 +227,9 @@ class @OutputPane extends LeafPane
 							show_error error_message
 					else
 						show_error error_message
+				when "scroll"
+					scroll_x = message.x
+					scroll_y = message.y
 				else
 					console.error "Unhandled message:", e.data
 		
@@ -257,15 +263,26 @@ class @OutputPane extends LeafPane
 			
 			head = body = ""
 			
-			error_handling = (parent_origin)->
-				# window.addEventListener "message", (e)->
-				# 	message = try JSON.parse e.data
-				# 	console.error "Message from #{e.origin}:", message
-				# 	switch message?.type
-				# 		when "..."
-				# 			
-				# 		else
-				# 			console.error "Unhandled message:", e.data
+			frame_code = (parent_origin, scroll_x, scroll_y)->
+				window.addEventListener "DOMContentLoaded", (e)->
+					window.scrollTo scroll_x, scroll_y
+				
+				window.addEventListener "message", (e)->
+					message = try JSON.parse e.data
+					console.error "Message from #{e.origin}:", message
+					switch message?.type
+						when "scrollTo"
+							window.scrollTo message.x, message.y
+						else
+							console.error "Unhandled message:", e.data
+				
+				window.addEventListener "scroll", (e)->
+					message = {
+						type: "scroll"
+						x: window.scrollX
+						y: window.scrollY
+					}
+					parent.postMessage JSON.stringify(message), parent_origin
 				
 				window.onerror = (error_message, source, line, column, error)->
 					message = {
@@ -276,7 +293,7 @@ class @OutputPane extends LeafPane
 					parent.postMessage JSON.stringify(message), parent_origin
 			
 			body += """
-				<script>~#{error_handling}(#{JSON.stringify location.origin})</script>
+				<script>(#{frame_code})(#{JSON.stringify location.origin}, #{JSON.stringify scroll_x}, #{JSON.stringify scroll_y})</script>
 			"""
 			head += """
 				<style>
