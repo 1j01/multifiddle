@@ -202,9 +202,13 @@
       }
     });
     return $G.on("keydown", function(e) {
-      var canvas, cell_size, col, ctrl_m, ctx, escape, h, i, j, n_cells, output_only_url, qrcode, ref2, ref3, row, size, w;
+      var canvas, cell_size, col, ctrl_m, ctrl_s, ctx, escape, h, i, j, n_cells, output_only_url, qrcode, ref2, ref3, row, size, w;
       ctrl_m = e.ctrlKey && e.keyCode === 77;
+      ctrl_s = e.ctrlKey && e.keyCode === 83;
       escape = e.keyCode === 27;
+      if (ctrl_s) {
+        e.preventDefault();
+      }
       if (escape || ctrl_m) {
         if ($(".qr-code-popup").length) {
           $(".qr-code-popup").remove();

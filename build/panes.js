@@ -382,21 +382,6 @@
             window.addEventListener("DOMContentLoaded", function(e) {
               return window.scrollTo(scroll_x, scroll_y);
             });
-            window.addEventListener("message", function(e) {
-              var message;
-              message = (function() {
-                try {
-                  return JSON.parse(e.data);
-                } catch (_error) {}
-              })();
-              console.error("Message from " + e.origin + ":", message);
-              switch (message != null ? message.type : void 0) {
-                case "scrollTo":
-                  return window.scrollTo(message.x, message.y);
-                default:
-                  return console.error("Unhandled message:", e.data);
-              }
-            });
             window.addEventListener("scroll", function(e) {
               var message;
               message = {

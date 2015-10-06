@@ -137,7 +137,10 @@ $ ->
 	
 	$G.on "keydown", (e)->
 		ctrl_m = e.ctrlKey and e.keyCode is 77
+		ctrl_s = e.ctrlKey and e.keyCode is 83
 		escape = e.keyCode is 27
+		if ctrl_s
+			e.preventDefault()
 		if escape or ctrl_m
 			if $(".qr-code-popup").length
 				$(".qr-code-popup").remove()

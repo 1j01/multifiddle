@@ -267,15 +267,6 @@ class @OutputPane extends LeafPane
 				window.addEventListener "DOMContentLoaded", (e)->
 					window.scrollTo scroll_x, scroll_y
 				
-				window.addEventListener "message", (e)->
-					message = try JSON.parse e.data
-					console.error "Message from #{e.origin}:", message
-					switch message?.type
-						when "scrollTo"
-							window.scrollTo message.x, message.y
-						else
-							console.error "Unhandled message:", e.data
-				
 				window.addEventListener "scroll", (e)->
 					message = {
 						type: "scroll"
