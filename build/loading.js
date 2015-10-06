@@ -2,8 +2,7 @@
 (function() {
   (function($) {
     return $.fn.loading = function(done) {
-      var PI, TAU, c, cos, d, draw, fallback_image, max, max_size, min, min_size, s, sin;
-      fallback_image = "http://d1ktyob8e4hu6c.cloudfront.net/static/img/wait.gif";
+      var PI, TAU, c, cos, d, draw, max, max_size, min, min_size, s, sin;
       min_size = 32;
       max_size = 100;
       s = max_size;
@@ -31,7 +30,7 @@
       };
       d = "loading-indicator";
       return this.each(function() {
-        var $canvas, $indicator, $parent, canvas, ctx, img, indicator, parent, start, t, update;
+        var $canvas, $indicator, $parent, canvas, ctx, indicator, parent, start, t, update;
         parent = this;
         $parent = $(parent);
         $indicator = $parent.data(d);
@@ -49,15 +48,8 @@
           } else {
             canvas = document.createElement("canvas");
             $canvas = $(canvas);
-            if (canvas.getContext) {
-              ctx = canvas.getContext("2d");
-              $indicator = $canvas;
-            } else {
-              indicator = img = document.createElement("img");
-              $indicator = $(img).attr({
-                src: fallback_image
-              });
-            }
+            ctx = canvas.getContext("2d");
+            $indicator = $canvas;
             indicator = $indicator[0];
             indicator.width = indicator.height = s;
             $indicator.appendTo("body");

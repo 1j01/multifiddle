@@ -1,6 +1,5 @@
 do ($ = jQuery)->
 	$.fn.loading = (done)->
-		fallback_image = "http://d1ktyob8e4hu6c.cloudfront.net/static/img/wait.gif"
 		min_size = 32
 		max_size = 100
 		
@@ -31,7 +30,7 @@ do ($ = jQuery)->
 				ctx.fill()
 				ctx.stroke()
 		
-		d = "loading-indicator" #name to store linked element ("data") under
+		d = "loading-indicator" # name to store linked element ("data") under
 		@each ->
 			parent = this
 			$parent = $(parent)
@@ -51,12 +50,8 @@ do ($ = jQuery)->
 					canvas = document.createElement "canvas"
 					$canvas = $(canvas)
 					
-					if canvas.getContext
-						ctx = canvas.getContext "2d"
-						$indicator = $canvas
-					else
-						indicator = img = document.createElement "img"
-						$indicator = $(img).attr src: fallback_image
+					ctx = canvas.getContext "2d"
+					$indicator = $canvas
 				
 					indicator = $indicator[0]
 					indicator.width = indicator.height = s

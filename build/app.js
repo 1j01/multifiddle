@@ -111,7 +111,6 @@
 
     Project.prototype.updateIcon = function() {
       var h, i, leaf_el, leaf_rect, len, ref1, root_rect, w, x, y;
-      this.ctx.save();
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       root_rect = this.root_pane.$[0].getBoundingClientRect();
       ref1 = $(".leaf-pane");
@@ -139,12 +138,13 @@
           }
         })();
         this.ctx.fillRect(~~x, ~~y, ~~w, ~~h);
-        this.ctx.clearRect(~~x - 1, ~~y + 0, 1, ~~h + 1);
-        this.ctx.clearRect(~~x + 0, ~~y - 1, ~~w + 1, 1);
+        this.ctx.clearRect(~~x - 1, ~~y - 1, 1, ~~h + 1);
+        this.ctx.clearRect(~~x - 1, ~~y - 1, ~~w + 1, 1);
       }
+      this.ctx.save();
       this.ctx.fillStyle = "lime";
       this.ctx.globalCompositeOperation = "destination-in";
-      this.ctx.arc(this.canvas.width / 2, this.canvas.height / 2, this.canvas.height / 2 - 0.5, 0, Math.PI * 2);
+      this.ctx.arc(this.canvas.width / 2 - 0.5, this.canvas.height / 2 - 0.5, this.canvas.height / 2 - 0.5, 0, Math.PI * 2);
       this.ctx.fill();
       this.ctx.restore();
       this.link.href = this.canvas.toDataURL("image/png");
