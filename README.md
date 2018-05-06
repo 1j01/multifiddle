@@ -26,9 +26,9 @@ with a simple interface.
 * Built with [Ace Editor][] and [Firepad][]
 
 [JSFiddle]: https://jsfiddle.net/
-[CodePen]: http://codepen.io/
-[JS Bin]: http://jsbin.com/
+[CodePen]: https://codepen.io/
+[JS Bin]: https://jsbin.com/
 [Fiddle Salad]: http://fiddlesalad.com/
-[CoffeeScript]: http://coffeescript.org/
+[CoffeeScript]: https://coffeescript.org/
 [Ace Editor]: https://ace.c9.io/
 [Firepad]: https://firepad.io/

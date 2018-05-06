@@ -217,7 +217,7 @@
       }
       if (ctrl_m) {
         e.preventDefault();
-        output_only_url = location.origin.match(/127\.0\.0\.1|localhost|^file:/) ? "http://1j01.github.io/multifiddle/#" + project_id + "/output" : "" + location.origin + location.pathname + "#" + project_id + "/output";
+        output_only_url = location.origin.match(/127\.0\.0\.1|localhost|^file:/) ? "https://1j01.github.io/multifiddle/#" + project_id + "/output" : "" + location.origin + location.pathname + "#" + project_id + "/output";
         size = 256;
         qrcode = new QRCode(-1, QRErrorCorrectLevel.M);
         qrcode.addData(output_only_url);
