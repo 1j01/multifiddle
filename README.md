@@ -1,4 +1,4 @@
-# [MultiFiddle](http://multifiddle.ml/#hello-world)
+# [MultiFiddle](https://multifiddle.ml/#hello-world)
 Fiddle with code in a minimalistic collaborative environment.
 
 MultiFiddle is intended as a multilingual**<sup>⁂</sup>** alternative to
@@ -22,7 +22,7 @@ with a simple interface.
 * Link to the contents of the output pane by adding `/output` to the URL
 * Generate a QR code that links to the output with <kbd>Ctrl+M</kbd>
   (it will live-reload even with just the output,
-  great if you want to play with [device orientation](http://multifiddle.ml/#device-orientation-II))
+  great if you want to play with [device orientation](https://multifiddle.ml/#device-orientation-II))
 * Built with [Ace Editor][] and [Firepad][]
 
 [JSFiddle]: https://jsfiddle.net/

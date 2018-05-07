@@ -150,7 +150,7 @@ $ ->
 			
 			output_only_url =
 				if location.origin.match /127\.0\.0\.1|localhost|^file:/
-					"https://1j01.github.io/multifiddle/##{project_id}/output"
+					"https://multifiddle.ml/##{project_id}/output"
 				else
 					"#{location.origin}#{location.pathname}##{project_id}/output"
 			
