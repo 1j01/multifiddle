@@ -13,7 +13,7 @@ with a simple interface.
    Fiddle Salad, CodeSandbox, JS Bin, JSFiddle, and CodePen all have better language support so far
 2. There is no versioning/forking system, and your code is NOT SAFE (anyone could see or even delete your code)
 3. You can't put the code beside the output horizontally (a fancy panes system was planned)
-4. There is no sandbox, and you are NOT SAFE from the code (altho there's no login yet)
+4. There's not much sandboxing; (there's [a good list of best practices for making a code fiddling environment over here](https://github.com/jsbin/jsbin/wiki/Best-practices-for-building-your-own-live-paste-bin))
 
 ##### Features:
 
