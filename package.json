@@ -31,7 +31,7 @@
     "hacking"
   ],
   "devDependencies": {
-    "coffee-script": "^1.9.3",
+    "coffeescript": "^2.3.0",
     "live-server": "^1.2.0"
   },
   "private": true

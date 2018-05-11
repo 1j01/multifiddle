@@ -18,11 +18,12 @@ class @Pane
 class @PanesPane extends Pane
 	resizer_size = 8 # TODO: use CSS
 	
-	constructor: ({orientation})->
-		super
+	constructor: (options)->
+		super(options)
+
 		@$.addClass "panes-pane"
 		
-		@orientation = orientation or "y"
+		@orientation = options.orientation or "y"
 		@children = []
 		@$resizers = $()
 	
@@ -146,9 +147,11 @@ class @PanesPane extends Pane
 
 class @LeafPane extends Pane
 	@instances = []
-	constructor: ({lang, project})->
+	constructor: (options)->
+		super(options)
 		LeafPane.instances.push @
-		super
+		
+		{lang, project} = options
 		$pane = @$
 		$pane.addClass "leaf-pane"
 		
@@ -163,8 +166,9 @@ class @LeafPane extends Pane
 			else "#{lang}".toUpperCase()
 
 class @OutputPane extends LeafPane
-	constructor: ({project})->
-		super
+	constructor: (options)->
+		super(options)
+		{project} = options
 		
 		@disable_output_key = "prevent running #{project.fb.key()}"
 		@disable_output = localStorage[@disable_output_key]?
@@ -412,10 +416,12 @@ class @OutputPane extends LeafPane
 
 class @EditorPane extends LeafPane
 	@instances = []
-	constructor: ({lang, project})->
+	constructor: (options)->
+		super(options)
 		EditorPane.instances.push @
+		
+		{lang, project} = options
 		@lang = lang
-		super
 		$pane = @$
 		$pane.addClass "editor-pane"
 		
