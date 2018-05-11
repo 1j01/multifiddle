@@ -4,7 +4,7 @@
   "author": "Isaiah Odhner",
   "description": "Minimalistic multilingual collaborative code-fiddling",
   "scripts": {
-    "start": "index.html",
+    "start": "live-server",
     "prepublish": "coffee -co build src",
     "build": "coffee -co build src",
     "dev": "coffee -wo build src"
@@ -31,7 +31,8 @@
     "hacking"
   ],
   "devDependencies": {
-    "coffee-script": "^1.9.3"
+    "coffee-script": "^1.9.3",
+    "live-server": "^1.2.0"
   },
   "private": true
 }
