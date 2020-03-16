@@ -1,7 +1,8 @@
 
 node_modules/
 
-build/
+# For now, include the built files for GitHub pages
+# build/
 
 # Windows image file caches
 Thumbs.db
